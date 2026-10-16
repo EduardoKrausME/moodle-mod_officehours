@@ -75,41 +75,24 @@ class mod_officehours_mod_form extends moodleform_mod {
     public function add_completion_rules(): array {
         $mform = $this->_form;
         foreach (["completionbooked", "completionattended"] as $field) {
-            $name = $this->get_suffixed_name($field);
+            $name = $field;
             $mform->addElement("advcheckbox", $name, get_string($field, "officehours"));
         }
-        $count = $this->get_suffixed_name("completioncount");
+        $count = "completioncount";
         $mform->addElement("text", $count, get_string("completiontarget", "officehours"), ["size" => 5]);
         $mform->setType($count, PARAM_INT);
         $mform->setDefault($count, 0);
-        return [$this->get_suffixed_name("completionbooked"),
-            $this->get_suffixed_name("completionattended"), $count];
+        return ["completionbooked",
+            "completionattended", $count];
     }
 
     /**
      * Completion rule enabled for the Office Hours activity.
      */
     public function completion_rule_enabled($data): bool {
-        return !empty($data[$this->get_suffixed_name("completionbooked")]) ||
-            !empty($data[$this->get_suffixed_name("completionattended")]) ||
-            !empty($data[$this->get_suffixed_name("completioncount")]);
-    }
-
-    /**
-     * Get data for the Office Hours activity.
-     */
-    public function get_data() {
-        $data = parent::get_data();
-        if (!$data) {
-            return $data;
-        }
-        foreach (["completionbooked", "completionattended", "completioncount"] as $field) {
-            $suffix = $this->get_suffixed_name($field);
-            if (property_exists($data, $suffix)) {
-                $data->{$field} = (int)$data->{$suffix};
-            }
-        }
-        return $data;
+        return !empty($data["completionbooked"]) ||
+            !empty($data["completionattended"]) ||
+            !empty($data["completioncount"]);
     }
 
     /**
@@ -127,7 +110,7 @@ class mod_officehours_mod_form extends moodleform_mod {
                 $errors[$field] = get_string("nonnegative", "officehours");
             }
         }
-        $count = $this->get_suffixed_name("completioncount");
+        $count = "completioncount";
         if (isset($data[$count]) && (int)$data[$count] < 0) {
             $errors[$count] = get_string("nonnegative", "officehours");
         }
