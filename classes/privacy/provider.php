@@ -161,7 +161,8 @@ final class provider implements
             $DB->delete_records("officehours_notification", ["bookingid" => $booking->id]);
             $DB->delete_records("officehours_booking", ["id" => $booking->id]);
         }
-        foreach ([$DB->get_records_select("officehours_waitlist", "officehoursid = :officeid AND userid " . $insql, $params)] as $records) {
+        foreach ([$DB->get_records_select("officehours_waitlist",
+                "officehoursid = :officeid AND userid " . $insql, $params)] as $records) {
             foreach ($records as $record) {
                 $DB->delete_records("officehours_notification", ["waitlistid" => $record->id]);
                 $DB->delete_records("officehours_waitlist", ["id" => $record->id]);

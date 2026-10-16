@@ -40,7 +40,8 @@ final class availability_service {
         }
         new \DateTimeZone($data["timezone"]);
         if ($id) {
-            $original = $DB->get_record("officehours_availability", ["id" => $id, "officehoursid" => $officehoursid], "*", MUST_EXIST);
+            $original = $DB->get_record("officehours_availability",
+                ["id" => $id, "officehoursid" => $officehoursid], "*", MUST_EXIST);
             if ((int)$original->teacherid !== $teacherid) {
                 throw new \invalid_parameter_exception("Ownership mismatch");
             }

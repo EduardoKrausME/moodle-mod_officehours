@@ -54,7 +54,8 @@ class mod_officehours_mod_form extends moodleform_mod {
         }
         foreach (["allowreschedule", "waitlistenabled", "approvalrequired", "showbusy", "allowsubject"] as $name) {
             $mform->addElement("advcheckbox", $name, get_string($name, "officehours"));
-            $mform->setDefault($name, ($name === "allowreschedule" || $name === "waitlistenabled" || $name === "allowsubject") ? 1 : 0);
+            $mform->setDefault($name,
+                ($name === "allowreschedule" || $name === "waitlistenabled" || $name === "allowsubject") ? 1 : 0);
         }
         $mform->addElement("textarea", "additionalinfo", get_string("additionalinfo", "officehours"));
         $mform->setType("additionalinfo", PARAM_TEXT);

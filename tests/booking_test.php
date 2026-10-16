@@ -32,7 +32,8 @@ use mod_officehours\local\slot_service;
  */
 final class booking_test extends \advanced_testcase {
     /**
- * Document the Office Hours behaviour.
+     * Verify booking constraints and capacity.
+     *
      * @covers \mod_officehours\local\booking_service::book
      * @covers \mod_officehours\local\slot_service::occupied
      */

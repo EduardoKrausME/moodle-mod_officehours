@@ -18,8 +18,6 @@ Feature: Teachers can create an Office Hours activity
   Scenario: Add an Office Hours activity
     Given I log in as "teacher"
     And I am on "Test course" course homepage with editing mode on
-    When I add a "Office Hours" to section "1"
-    And I set the following fields to these values:
+    When I add an officehours activity to course "Test course" section "1" and I fill the form with:
       | Name | Academic consultations |
-    And I press "Save and return to course"
     Then I should see "Academic consultations"

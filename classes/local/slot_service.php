@@ -74,14 +74,17 @@ final class slot_service {
                     if ($rule->kind === "weekly" && $dateindex !== (int)$rule->weekday) {
                         continue;
                     }
-                    if ($rule->kind === "single" && $date !== (new DateTimeImmutable("@" . $rule->startdate))->setTimezone($tz)->format("Y-m-d")) {
+                    $singledate = (new DateTimeImmutable("@" . $rule->startdate))->setTimezone($tz)->format("Y-m-d");
+                    if ($rule->kind === "single" && $date !== $singledate) {
                         continue;
                     }
                     $step = (int)$activity->slotduration + (int)$activity->bufferminutes;
                     if ($step <= 0) {
                         continue;
                     }
-                    for ($minute = (int)$rule->startminute; $minute + (int)$activity->slotduration <= (int)$rule->endminute; $minute += $step) {
+                    for ($minute = (int)$rule->startminute;
+                            $minute + (int)$activity->slotduration <= (int)$rule->endminute;
+                            $minute += $step) {
                         $hour = sprintf("%02d:%02d:00", intdiv($minute, 60), $minute % 60);
                         $datehour = $date . " " . $hour;
                         $startutc = new DateTimeImmutable($datehour, $tz);

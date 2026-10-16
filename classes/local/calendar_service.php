@@ -58,9 +58,9 @@ final class calendar_service {
                 "visible" => 1,
             ];
             if ($previous) {
-                \calendar_event::load($previous->eventid)->update($data);
+                \calendar_event::load($previous->eventid)->update($data, false);
             } else {
-                $event = \calendar_event::create($data);
+                $event = \calendar_event::create($data, false);
                 $DB->insert_record("officehours_calendar", (object)[
                     "officehoursid" => $activity->id, "bookingid" => $bookingid,
                     "userid" => $userid, "eventid" => $event->id,
