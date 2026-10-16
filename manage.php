@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Teacher dashboard and reservation decisions.
@@ -33,6 +33,7 @@ $search = optional_param("search", "", PARAM_TEXT);
 $action = optional_param("action", "", PARAM_ALPHA);
 $bookingid = optional_param("bookingid", 0, PARAM_INT);
 [$cm, $course, $context, $activity] = \mod_officehours\local\access_manager::load($id);
+require_login($course, true, $cm);
 \mod_officehours\local\access_manager::capability($cm, "viewbookings");
 $PAGE->set_url(new moodle_url("/mod/officehours/manage.php", ["id" => $id]));
 $PAGE->set_context($context);

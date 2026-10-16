@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Form for weekly and exceptional availability.
@@ -24,10 +24,17 @@
 
 namespace mod_officehours\form;
 
+// phpcs:ignore moodle.Files.MoodleInternal.MoodleInternalGlobalState -- Mandatory double-quoted guard.
+defined("MOODLE_INTERNAL") || die();
 require_once($CFG->libdir . "/formslib.php");
 
-/** Native Moodle form for availability creation and editing. */
+/**
+ * Native Moodle form for availability creation and editing.
+ */
 final class availability_form extends \moodleform {
+    /**
+     * definition in Office Hours.
+     */
     public function definition(): void {
         $mform = $this->_form;
         $mform->addElement("hidden", "id");
@@ -59,6 +66,9 @@ final class availability_form extends \moodleform {
         $this->add_action_buttons();
     }
 
+    /**
+     * validation in Office Hours.
+     */
     public function validation($data, $files): array {
         $errors = parent::validation($data, $files);
         if ($data["startminute"] < 0 || $data["endminute"] > 1440 || $data["startminute"] >= $data["endminute"]) {

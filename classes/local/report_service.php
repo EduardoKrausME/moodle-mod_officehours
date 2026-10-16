@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Teacher dashboard, CSV, and student schedule data.
@@ -24,8 +24,13 @@
 
 namespace mod_officehours\local;
 
-/** Restrict reporting to authorized bookings. */
+/**
+ * Restrict reporting to authorized bookings.
+ */
 final class report_service {
+    /**
+     * bookings in Office Hours.
+     */
     public static function bookings(\stdClass $cm, int $from, int $to, int $studentid = 0): array {
         global $DB, $USER;
         access_manager::capability($cm, "viewbookings");
@@ -49,6 +54,9 @@ final class report_service {
         return $result;
     }
 
+    /**
+     * export in Office Hours.
+     */
     public static function export(\stdClass $cm, int $from, int $to, int $studentid = 0): void {
         access_manager::capability($cm, "reports");
         $rows = self::bookings($cm, $from, $to, $studentid);

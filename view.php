@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Office hours student agenda.
@@ -29,6 +29,7 @@ $day = optional_param("day", time(), PARAM_INT);
 $teacher = optional_param("teacher", 0, PARAM_INT);
 $rescheduleid = optional_param("reschedule", 0, PARAM_INT);
 [$cm, $course, $context, $activity] = \mod_officehours\local\access_manager::load($id);
+require_login($course, true, $cm);
 $PAGE->set_url(new moodle_url("/mod/officehours/view.php", ["id" => $id]));
 $PAGE->set_context($context);
 $PAGE->set_title(format_string($activity->name));

@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Private user calendar events.
@@ -24,8 +24,13 @@
 
 namespace mod_officehours\local;
 
-/** One private user event per booking participant. */
+/**
+ * One private user event per booking participant.
+ */
 final class calendar_service {
+    /**
+     * sync in Office Hours.
+     */
     public static function sync(int $bookingid): void {
         global $DB;
         $booking = $DB->get_record("officehours_booking", ["id" => $bookingid]);
@@ -71,6 +76,9 @@ final class calendar_service {
         }
     }
 
+    /**
+     * remove in Office Hours.
+     */
     public static function remove(int $bookingid): void {
         global $DB;
         foreach ($DB->get_records("officehours_calendar", ["bookingid" => $bookingid]) as $row) {

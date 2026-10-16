@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Waiting list and timed offers.
@@ -24,8 +24,13 @@
 
 namespace mod_officehours\local;
 
-/** Every promotion is protected by the slot lock held by its caller. */
+/**
+ * Every promotion is protected by the slot lock held by its caller.
+ */
 final class waiting_list_service {
+    /**
+     * join in Office Hours.
+     */
     public static function join(int $slotid, int $userid): int {
         global $DB;
         $slot = $DB->get_record("officehours_slot", ["id" => $slotid], "*", MUST_EXIST);
@@ -67,6 +72,9 @@ final class waiting_list_service {
         }
     }
 
+    /**
+     * promote locked in Office Hours.
+     */
     public static function promote_locked(int $slotid): void {
         global $DB;
         $slot = $DB->get_record("officehours_slot", ["id" => $slotid], "*", MUST_EXIST);
@@ -96,6 +104,9 @@ final class waiting_list_service {
         }
     }
 
+    /**
+     * expire and promote in Office Hours.
+     */
     public static function expire_and_promote(): void {
         global $DB;
         $sql = "SELECT DISTINCT slotid FROM {officehours_waitlist} WHERE status = :status AND offereduntil <= :now";

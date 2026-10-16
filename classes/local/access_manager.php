@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Access checks for office hours.
@@ -27,8 +27,13 @@ namespace mod_officehours\local;
 use context_module;
 use stdClass;
 
-/** Enforce permissions on every server-side mutation. */
+/**
+ * Enforce permissions on every server-side mutation.
+ */
 final class access_manager {
+    /**
+     * load in Office Hours.
+     */
     public static function load(int $cmid): array {
         $cm = get_coursemodule_from_id("officehours", $cmid, 0, false, MUST_EXIST);
         $course = get_course($cm->course);
@@ -41,10 +46,16 @@ final class access_manager {
         return [$cm, $course, $context, $config];
     }
 
+    /**
+     * capability in Office Hours.
+     */
     public static function capability(stdClass $cm, string $name): void {
         require_capability("mod/officehours:" . $name, context_module::instance($cm->id));
     }
 
+    /**
+     * teacher in Office Hours.
+     */
     public static function teacher(int $officehoursid, int $teacherid, string $capability): void {
         global $DB;
         $cm = get_coursemodule_from_instance("officehours", $officehoursid, 0, false, MUST_EXIST);
@@ -59,7 +70,9 @@ final class access_manager {
         }
     }
 
-    /** Separate groups and visible-group restrictions apply to bookings too. */
+    /**
+     * Separate groups and visible-group restrictions apply to bookings too.
+     */
     public static function visible_student(stdClass $cm, int $studentid, int $viewerid): bool {
         if ($studentid === $viewerid) {
             return true;

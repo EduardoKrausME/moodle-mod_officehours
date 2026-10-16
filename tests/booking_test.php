@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Integration tests for booking state and capacity.
@@ -27,9 +27,12 @@ namespace mod_officehours;
 use mod_officehours\local\booking_service;
 use mod_officehours\local\slot_service;
 
-/** Database-backed reservation checks. */
+/**
+ * Database-backed reservation checks.
+ */
 final class booking_test extends \advanced_testcase {
     /**
+ * Document the Office Hours behaviour.
      * @covers \mod_officehours\local\booking_service::book
      * @covers \mod_officehours\local\slot_service::occupied
      */
@@ -65,7 +68,10 @@ final class booking_test extends \advanced_testcase {
         booking_service::book((int)$activity->id, $slotid, $student2->id);
     }
 
-    /** @covers \mod_officehours\local\booking_service::change_state */
+    /**
+     * Document the Office Hours behaviour.
+     * @covers \mod_officehours\local\booking_service::change_state
+     */
     public function test_cancelled_booking_cannot_be_approved(): void {
         global $DB;
         $this->resetAfterTest();

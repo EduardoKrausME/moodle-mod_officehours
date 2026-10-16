@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Restore and map activity references.
@@ -22,9 +22,16 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+// phpcs:ignore moodle.Files.MoodleInternal.MoodleInternalGlobalState -- Mandatory double-quoted guard.
 defined("MOODLE_INTERNAL") || die();
 
+/**
+ * Restore officehours activity structure step for the Office Hours activity.
+ */
 class restore_officehours_activity_structure_step extends restore_activity_structure_step {
+    /**
+     * Define structure for the Office Hours activity.
+     */
     protected function define_structure(): array {
         $paths = [new restore_path_element("officehours", "/activity/officehours"),
             new restore_path_element("officehours_availability", "/activity/officehours/availabilities/availability"),
@@ -37,6 +44,9 @@ class restore_officehours_activity_structure_step extends restore_activity_struc
         return $this->prepare_activity_structure($paths);
     }
 
+    /**
+     * Process officehours for the Office Hours activity.
+     */
     protected function process_officehours($data): void {
         global $DB;
         $data = (object)$data;
@@ -48,6 +58,9 @@ class restore_officehours_activity_structure_step extends restore_activity_struc
         $this->set_mapping("officehours", $oldid, $newid);
     }
 
+    /**
+     * Process officehours availability for the Office Hours activity.
+     */
     protected function process_officehours_availability($data): void {
         global $DB;
         $data = (object)$data;
@@ -59,6 +72,9 @@ class restore_officehours_activity_structure_step extends restore_activity_struc
         $this->set_mapping("officehours_availability", $oldid, $newid);
     }
 
+    /**
+     * Process officehours exception for the Office Hours activity.
+     */
     protected function process_officehours_exception($data): void {
         global $DB;
         $data = (object)$data;
@@ -68,6 +84,9 @@ class restore_officehours_activity_structure_step extends restore_activity_struc
         $DB->insert_record("officehours_exception", $data);
     }
 
+    /**
+     * Process officehours slot for the Office Hours activity.
+     */
     protected function process_officehours_slot($data): void {
         global $DB;
         $data = (object)$data;
@@ -80,6 +99,9 @@ class restore_officehours_activity_structure_step extends restore_activity_struc
         $this->set_mapping("officehours_slot", $oldid, $newid);
     }
 
+    /**
+     * Process officehours booking for the Office Hours activity.
+     */
     protected function process_officehours_booking($data): void {
         global $DB;
         $data = (object)$data;
@@ -93,6 +115,9 @@ class restore_officehours_activity_structure_step extends restore_activity_struc
         }
     }
 
+    /**
+     * Process officehours waitlist for the Office Hours activity.
+     */
     protected function process_officehours_waitlist($data): void {
         global $DB;
         $data = (object)$data;
@@ -105,6 +130,9 @@ class restore_officehours_activity_structure_step extends restore_activity_struc
         }
     }
 
+    /**
+     * After execute for the Office Hours activity.
+     */
     protected function after_execute(): void {
         global $DB;
         $this->add_related_files("mod_officehours", "intro", null);

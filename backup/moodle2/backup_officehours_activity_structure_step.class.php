@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Backup activity and related entities.
@@ -22,9 +22,16 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+// phpcs:ignore moodle.Files.MoodleInternal.MoodleInternalGlobalState -- Mandatory double-quoted guard.
 defined("MOODLE_INTERNAL") || die();
 
+/**
+ * Backup officehours activity structure step for the Office Hours activity.
+ */
 class backup_officehours_activity_structure_step extends backup_activity_structure_step {
+    /**
+     * Define structure for the Office Hours activity.
+     */
     protected function define_structure(): backup_nested_element {
         $userinfo = $this->get_setting_value("userinfo");
         $activity = new backup_nested_element("officehours", ["id"], ["name", "intro", "introformat",

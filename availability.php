@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Teacher availability administration.
@@ -28,6 +28,7 @@ $id = required_param("id", PARAM_INT);
 $ruleid = optional_param("ruleid", 0, PARAM_INT);
 $action = optional_param("action", "edit", PARAM_ALPHA);
 [$cm, $course, $context, $activity] = \mod_officehours\local\access_manager::load($id);
+require_login($course, true, $cm);
 \mod_officehours\local\access_manager::capability($cm, "createavailability");
 $PAGE->set_url(new moodle_url("/mod/officehours/availability.php", ["id" => $id]));
 $PAGE->set_title(get_string("availability", "officehours"));

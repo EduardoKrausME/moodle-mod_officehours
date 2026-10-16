@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Manage teacher availability rules and exceptions.
@@ -24,8 +24,13 @@
 
 namespace mod_officehours\local;
 
-/** Server-side availability mutations, preserving booked history. */
+/**
+ * Server-side availability mutations, preserving booked history.
+ */
 final class availability_service {
+    /**
+     * save in Office Hours.
+     */
     public static function save(int $officehoursid, int $teacherid, array $data, int $id = 0): int {
         global $DB;
         access_manager::teacher($officehoursid, $teacherid, "createavailability");
@@ -51,6 +56,9 @@ final class availability_service {
         ]));
     }
 
+    /**
+     * block in Office Hours.
+     */
     public static function block(int $officehoursid, int $teacherid, int $from, int $to, string $reason = ""): int {
         global $DB;
         access_manager::teacher($officehoursid, $teacherid, "createavailability");
@@ -92,6 +100,9 @@ final class availability_service {
         }
     }
 
+    /**
+     * delete in Office Hours.
+     */
     public static function delete(int $officehoursid, int $teacherid, int $id): void {
         global $DB;
         access_manager::teacher($officehoursid, $teacherid, "createavailability");

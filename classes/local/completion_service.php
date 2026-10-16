@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Completion API integration.
@@ -24,8 +24,13 @@
 
 namespace mod_officehours\local;
 
-/** Derive completion from persisted confirmed and completed appointments. */
+/**
+ * Derive completion from persisted confirmed and completed appointments.
+ */
 final class completion_service {
+    /**
+     * complete in Office Hours.
+     */
     public static function complete(int $officehoursid, int $userid, bool $type = false): bool {
         global $DB;
         $activity = $DB->get_record("officehours", ["id" => $officehoursid], "*", MUST_EXIST);
@@ -50,6 +55,9 @@ final class completion_service {
         return !in_array(false, $checks, true);
     }
 
+    /**
+     * update in Office Hours.
+     */
     public static function update(int $officehoursid, int $userid): void {
         $cm = get_coursemodule_from_instance("officehours", $officehoursid);
         if (!$cm || $cm->completion != COMPLETION_TRACKING_AUTOMATIC) {

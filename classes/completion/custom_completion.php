@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Moodle custom completion rules.
@@ -26,12 +26,20 @@ namespace mod_officehours\completion;
 
 use core_completion\activity_custom_completion;
 
-/** Expose the booking and participation criteria to the modern completion API. */
+/**
+ * Expose the booking and participation criteria to the modern completion API.
+ */
 final class custom_completion extends activity_custom_completion {
+    /**
+     * get defined custom rules in Office Hours.
+     */
     public static function get_defined_custom_rules(): array {
         return ["completionbooked", "completionattended", "completioncount"];
     }
 
+    /**
+     * get custom rule descriptions in Office Hours.
+     */
     public function get_custom_rule_descriptions(): array {
         global $DB;
         $activity = $DB->get_record("officehours", ["id" => $this->cm->instance], "*", MUST_EXIST);
@@ -42,6 +50,9 @@ final class custom_completion extends activity_custom_completion {
         ];
     }
 
+    /**
+     * get state in Office Hours.
+     */
     public function get_state(string $rule): int {
         global $DB;
         if (!in_array($rule, self::get_defined_custom_rules(), true)) {
@@ -61,6 +72,9 @@ final class custom_completion extends activity_custom_completion {
         return $passed ? COMPLETION_COMPLETE : COMPLETION_INCOMPLETE;
     }
 
+    /**
+     * get sort order in Office Hours.
+     */
     public function get_sort_order(): array {
         return self::get_defined_custom_rules();
     }

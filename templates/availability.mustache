@@ -1,8 +1,8 @@
 <section class="officehours" aria-label="{{title}}">
-    <header class="officehours__heading"><h2>{{title}}</h2><a class="btn btn-outline-primary" href="{{blockurl}}">{{blocklabel}}</a></header>
+    <header class="officehours__heading"><h2>{{title}}</h2><a class="btn btn-outline-primary" href="{{{blockurl}}}">{{blocklabel}}</a></header>
     <div class="officehours__slots">{{#entries}}<article class="officehours__slot">
         <div><strong>{{kind}}</strong><div>{{from}} – {{until}}</div></div>
-        <div class="officehours__actions"><a class="btn btn-outline-secondary" href="{{editurl}}">{{edit}}</a>
+        <div class="officehours__actions"><a class="btn btn-outline-secondary" href="{{{editurl}}}">{{edit}}</a>
             <form action="{{actionurl}}" method="post">
                 <input type="hidden" name="id" value="{{cmid}}"><input type="hidden" name="ruleid" value="{{id}}">
                 <input type="hidden" name="action" value="delete"><input type="hidden" name="sesskey" value="{{sesskey}}">

@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Booking confirmation form.
@@ -24,10 +24,17 @@
 
 namespace mod_officehours\form;
 
+// phpcs:ignore moodle.Files.MoodleInternal.MoodleInternalGlobalState -- Mandatory double-quoted guard.
+defined("MOODLE_INTERNAL") || die();
 require_once($CFG->libdir . "/formslib.php");
 
-/** CSRF-protected booking confirmation. */
+/**
+ * CSRF-protected booking confirmation.
+ */
 final class booking_form extends \moodleform {
+    /**
+     * definition in Office Hours.
+     */
     public function definition(): void {
         $mform = $this->_form;
         foreach (["id", "slotid", "offerid"] as $name) {

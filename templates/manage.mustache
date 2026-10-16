@@ -1,8 +1,8 @@
 <section class="officehours" aria-label="{{title}}">
     <div class="officehours__heading"><h2>{{title}}</h2>
-        <a href="{{exporturl}}" class="btn btn-outline-primary">{{export}}</a>
+        <a href="{{{exporturl}}}" class="btn btn-outline-primary">{{export}}</a>
     </div>
-    <nav class="officehours__period" aria-label="{{title}}">{{#periods}}<a class="btn btn-outline-secondary" href="{{url}}">{{label}}</a>{{/periods}}</nav>
+    <nav class="officehours__period" aria-label="{{title}}">{{#periods}}<a class="btn btn-outline-secondary" href="{{{url}}}">{{label}}</a>{{/periods}}</nav>
     <form class="officehours__search" method="get" action="{{actionurl}}">
         <input type="hidden" name="id" value="{{cmid}}">
         <label for="officehours-search">{{searchlabel}}</label>

@@ -2,23 +2,23 @@
     <div class="officehours__heading">
         <div><h2>{{name}}</h2><div class="officehours__intro">{{{intro}}}</div></div>
         {{#canmanage}}<nav aria-label="{{titleagenda}}" class="officehours__actions">
-            <a class="btn btn-outline-primary" href="{{availabilityurl}}">{{availability}}</a>
-            <a class="btn btn-primary" href="{{manageurl}}">{{manage}}</a>
+            <a class="btn btn-outline-primary" href="{{{availabilityurl}}}">{{availability}}</a>
+            <a class="btn btn-primary" href="{{{manageurl}}}">{{manage}}</a>
         </nav>{{/canmanage}}
     </div>
     <nav class="officehours__nav" aria-label="{{titleagenda}}">
-        <a class="btn btn-outline-secondary" href="{{backurl}}">{{previous}}</a>
+        <a class="btn btn-outline-secondary" href="{{{backurl}}}">{{previous}}</a>
         <h3>{{titleagenda}}</h3>
-        <a class="btn btn-outline-secondary" href="{{nexturl}}">{{next}}</a>
+        <a class="btn btn-outline-secondary" href="{{{nexturl}}}">{{next}}</a>
     </nav>
-    <div class="officehours__teachers">{{#teachers}}<a href="{{url}}" class="officehours__filter">{{name}}</a>{{/teachers}}</div>
+    <div class="officehours__teachers">{{#teachers}}<a href="{{{url}}}" class="officehours__filter">{{name}}</a>{{/teachers}}</div>
     <div class="officehours__slots" data-officehours-agenda>
         {{^rows}}<p class="alert alert-info">{{empty}}</p>{{/rows}}
         {{#rows}}<article class="officehours__slot">
             <div><strong>{{date}}</strong><div class="officehours__time">{{time}}</div>
                 <div class="officehours__teacher">{{teacher}} · {{duration}} min</div></div>
             <div class="officehours__slotactions">
-                {{#free}}<span class="badge badge-success">{{available}}</span><a class="btn btn-primary" href="{{bookurl}}">{{reserve}}</a>{{/free}}
+                {{#free}}<span class="badge badge-success">{{available}}</span><a class="btn btn-primary" href="{{{bookurl}}}">{{reserve}}</a>{{/free}}
                 {{^free}}<span class="badge badge-secondary">{{busy}}</span>{{/free}}
                 {{#waitlist}}<form action="{{waiturl}}" method="post">
                     <input type="hidden" name="id" value="{{cmid}}">
@@ -41,7 +41,7 @@
     <h3>{{titlemine}}</h3>
     <div class="officehours__mybookings">{{#mine}}
         <article class="officehours__booking"><div><strong>{{date}}</strong>
-            <span class="badge badge-info">{{state}}</span><p>{{subject}}</p>{{#meetingurl}}<a href="{{meetingurl}}" target="_blank" rel="noopener noreferrer">{{meetinglabel}}</a>{{/meetingurl}}
+            <span class="badge badge-info">{{state}}</span><p>{{subject}}</p>{{#meetingurl}}<a href="{{{meetingurl}}}" target="_blank" rel="noopener noreferrer">{{meetinglabel}}</a>{{/meetingurl}}
             {{#location}}<span>{{location}}</span>{{/location}}</div>
             {{#cancel}}<form action="{{cancelurl}}" method="post">
                 <input type="hidden" name="id" value="{{cmid}}">
@@ -50,8 +50,8 @@
                 <input type="hidden" name="sesskey" value="{{sesskey}}">
                 <button class="btn btn-outline-danger" type="submit">{{cancellabel}}</button>
             </form>{{/cancel}}
-            {{#allowreschedule}}<a class="btn btn-outline-secondary" href="{{rescheduleurl}}">{{reschedulelabel}}</a>{{/allowreschedule}}
+            {{#allowreschedule}}<a class="btn btn-outline-secondary" href="{{{rescheduleurl}}}">{{reschedulelabel}}</a>{{/allowreschedule}}
         </article>{{/mine}}</div>
     {{#offers}}<article class="alert alert-primary"><strong>{{offeredlabel}}</strong> {{date}}
-        <a href="{{accepturl}}" class="btn btn-primary">{{acceptlabel}}</a></article>{{/offers}}
+        <a href="{{{accepturl}}}" class="btn btn-primary">{{acceptlabel}}</a></article>{{/offers}}
 </section>

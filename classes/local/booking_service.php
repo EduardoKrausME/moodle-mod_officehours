@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Reservation domain operations and state transitions.
@@ -24,15 +24,38 @@
 
 namespace mod_officehours\local;
 
-/** Transactional booking state machine. */
+/**
+ * Transactional booking state machine.
+ */
 final class booking_service {
+    /**
+     * PENDING in Office Hours.
+     */
     public const PENDING = "pending";
+    /**
+     * CONFIRMED in Office Hours.
+     */
     public const CONFIRMED = "confirmed";
+    /**
+     * CANCELLED in Office Hours.
+     */
     public const CANCELLED = "cancelled";
+    /**
+     * COMPLETED in Office Hours.
+     */
     public const COMPLETED = "completed";
+    /**
+     * NOSHOW in Office Hours.
+     */
     public const NOSHOW = "no-show";
+    /**
+     * REJECTED in Office Hours.
+     */
     public const REJECTED = "rejected";
 
+    /**
+     * ALLOWED in Office Hours.
+     */
     private const ALLOWED = [
         self::PENDING => [self::CONFIRMED, self::REJECTED, self::CANCELLED],
         self::CONFIRMED => [self::CANCELLED, self::COMPLETED, self::NOSHOW],
@@ -42,6 +65,9 @@ final class booking_service {
         self::REJECTED => [],
     ];
 
+    /**
+     * validate window in Office Hours.
+     */
     private static function validate_window(\stdClass $activity, \stdClass $slot, bool $cancel = false): void {
         $now = time();
         if ($cancel) {
@@ -58,6 +84,9 @@ final class booking_service {
         }
     }
 
+    /**
+     * validate student in Office Hours.
+     */
     private static function validate_student(\stdClass $cm, int $userid): void {
         global $USER;
         if ((int)$USER->id !== $userid) {
@@ -69,6 +98,9 @@ final class booking_service {
         }
     }
 
+    /**
+     * unique in Office Hours.
+     */
     private static function unique(int $slotid, int $userid, int $excludedid = 0): void {
         global $DB;
         if ($DB->record_exists_select("officehours_booking",
@@ -78,6 +110,9 @@ final class booking_service {
         }
     }
 
+    /**
+     * limit in Office Hours.
+     */
     private static function limit(\stdClass $activity, int $userid, int $excludedid = 0): void {
         global $DB;
         $count = $DB->count_records_select("officehours_booking",
@@ -88,7 +123,9 @@ final class booking_service {
         }
     }
 
-    /** The offered capacity is already reserved, and is excluded when converted. */
+    /**
+     * The offered capacity is already reserved, and is excluded when converted.
+     */
     public static function book(int $officehoursid, int $slotid, int $userid,
             string $subject = "", string $notes = "", int $offerid = 0): int {
         global $DB;
@@ -136,6 +173,9 @@ final class booking_service {
         }
     }
 
+    /**
+     * change state in Office Hours.
+     */
     public static function change_state(int $bookingid, string $state, int $actorid,
             string $internalnotes = "", string $outcome = ""): void {
         global $DB;
@@ -189,7 +229,9 @@ final class booking_service {
         }
     }
 
-    /** Atomic seat transfer across slots using stable lock ordering. */
+    /**
+     * Atomic seat transfer across slots using stable lock ordering.
+     */
     public static function reschedule(int $bookingid, int $newslotid, int $userid): void {
         global $DB;
         $old = $DB->get_record("officehours_booking", ["id" => $bookingid], "*", MUST_EXIST);

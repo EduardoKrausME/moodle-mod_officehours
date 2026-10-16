@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Configuration form for office hours.
@@ -22,10 +22,17 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+// phpcs:ignore moodle.Files.MoodleInternal.MoodleInternalGlobalState -- Mandatory double-quoted guard.
 defined("MOODLE_INTERNAL") || die();
 require_once($CFG->dirroot . "/course/moodleform_mod.php");
 
+/**
+ * Mod officehours mod form for the Office Hours activity.
+ */
 class mod_officehours_mod_form extends moodleform_mod {
+    /**
+     * Definition for the Office Hours activity.
+     */
     public function definition(): void {
         $mform = $this->_form;
         $mform->addElement("header", "general", get_string("general"));
@@ -61,6 +68,9 @@ class mod_officehours_mod_form extends moodleform_mod {
         $this->add_action_buttons();
     }
 
+    /**
+     * Add completion rules for the Office Hours activity.
+     */
     public function add_completion_rules(): array {
         $mform = $this->_form;
         foreach (["completionbooked", "completionattended"] as $field) {
@@ -75,12 +85,18 @@ class mod_officehours_mod_form extends moodleform_mod {
             $this->get_suffixed_name("completionattended"), $count];
     }
 
+    /**
+     * Completion rule enabled for the Office Hours activity.
+     */
     public function completion_rule_enabled($data): bool {
         return !empty($data[$this->get_suffixed_name("completionbooked")]) ||
             !empty($data[$this->get_suffixed_name("completionattended")]) ||
             !empty($data[$this->get_suffixed_name("completioncount")]);
     }
 
+    /**
+     * Get data for the Office Hours activity.
+     */
     public function get_data() {
         $data = parent::get_data();
         if (!$data) {
@@ -95,6 +111,9 @@ class mod_officehours_mod_form extends moodleform_mod {
         return $data;
     }
 
+    /**
+     * Validation for the Office Hours activity.
+     */
     public function validation($data, $files): array {
         $errors = parent::validation($data, $files);
         foreach (["slotduration", "capacity", "maxbookings", "offerexpires"] as $field) {

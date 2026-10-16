@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * User data export and erasure under Moodle Privacy API.
@@ -33,12 +33,17 @@ use core_privacy\local\request\contextlist;
 use core_privacy\local\request\userlist;
 use core_privacy\local\request\writer;
 
-/** Privacy provider for student and staff scheduling data. */
+/**
+ * Privacy provider for student and staff scheduling data.
+ */
 final class provider implements
         \core_privacy\local\metadata\provider,
         \core_privacy\local\request\core_user_data_provider,
         \core_privacy\local\request\core_userlist_provider {
 
+    /**
+     * get metadata in Office Hours.
+     */
     public static function get_metadata(collection $collection): collection {
         $tables = [
             "officehours_booking" => ["userid" => "privacy:userid", "subject" => "privacy:booking",
@@ -56,6 +61,9 @@ final class provider implements
         return $collection;
     }
 
+    /**
+     * contexts in Office Hours.
+     */
     private static function contexts(int $userid): array {
         global $DB;
         $ids = [];
@@ -70,6 +78,9 @@ final class provider implements
         return array_unique(array_map("intval", $ids));
     }
 
+    /**
+     * get contexts for userid in Office Hours.
+     */
     public static function get_contexts_for_userid(int $userid): contextlist {
         $result = new contextlist();
         foreach (self::contexts($userid) as $instanceid) {
@@ -81,6 +92,9 @@ final class provider implements
         return $result;
     }
 
+    /**
+     * get users in context in Office Hours.
+     */
     public static function get_users_in_context(userlist $userlist): void {
         global $DB;
         $context = $userlist->get_context();
@@ -102,6 +116,9 @@ final class provider implements
         $userlist->add_users(array_filter(array_unique(array_map("intval", $users))));
     }
 
+    /**
+     * export user data in Office Hours.
+     */
     public static function export_user_data(approved_contextlist $contextlist): void {
         global $DB;
         $userid = $contextlist->get_user()->id;
@@ -126,6 +143,9 @@ final class provider implements
         }
     }
 
+    /**
+     * erase in Office Hours.
+     */
     private static function erase(int $instanceid, array $userids): void {
         global $DB;
         $userids = array_filter(array_unique(array_map("intval", $userids)));
@@ -157,6 +177,9 @@ final class provider implements
         }
     }
 
+    /**
+     * delete data for all users in context in Office Hours.
+     */
     public static function delete_data_for_all_users_in_context(context $context): void {
         global $DB;
         if ($context->contextlevel !== CONTEXT_MODULE) {
@@ -175,6 +198,9 @@ final class provider implements
         }
     }
 
+    /**
+     * delete data for user in Office Hours.
+     */
     public static function delete_data_for_user(approved_contextlist $contextlist): void {
         foreach ($contextlist->get_contexts() as $context) {
             if ($context->contextlevel === CONTEXT_MODULE) {
@@ -186,6 +212,9 @@ final class provider implements
         }
     }
 
+    /**
+     * delete data for users in Office Hours.
+     */
     public static function delete_data_for_users(approved_userlist $userlist): void {
         $context = $userlist->get_context();
         if ($context->contextlevel === CONTEXT_MODULE) {

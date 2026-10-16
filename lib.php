@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Moodle activity callbacks.
@@ -22,25 +22,31 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+// phpcs:ignore moodle.Files.MoodleInternal.MoodleInternalGlobalState -- Mandatory double-quoted guard.
 defined("MOODLE_INTERNAL") || die();
 
-/** @return bool */
+/**
+ * Office Hours callback.
+ * @return bool
+ */
 function officehours_supports(string $feature): ?bool {
     switch ($feature) {
         case FEATURE_MOD_INTRO:
         case FEATURE_SHOW_DESCRIPTION:
-        case FEATURE_GRADE_HAS_GRADE:
-            return $feature !== FEATURE_GRADE_HAS_GRADE;
         case FEATURE_BACKUP_MOODLE2:
         case FEATURE_COMPLETION_TRACKS_VIEWS:
         case FEATURE_COMPLETION_HAS_RULES:
             return true;
+        case FEATURE_GRADE_HAS_GRADE:
+            return false;
         default:
             return null;
     }
 }
 
-/** Add an instance. */
+/**
+ * Add an instance.
+ */
 function officehours_add_instance(stdClass $data, ?mod_officehours_mod_form $mform = null): int {
     global $DB;
     $data->timecreated = time();
@@ -48,7 +54,9 @@ function officehours_add_instance(stdClass $data, ?mod_officehours_mod_form $mfo
     return $DB->insert_record("officehours", $data);
 }
 
-/** Update an instance. */
+/**
+ * Update an instance.
+ */
 function officehours_update_instance(stdClass $data, ?mod_officehours_mod_form $mform = null): bool {
     global $DB;
     $data->id = $data->instance;
@@ -56,7 +64,9 @@ function officehours_update_instance(stdClass $data, ?mod_officehours_mod_form $
     return $DB->update_record("officehours", $data);
 }
 
-/** Delete an instance and its private data. */
+/**
+ * Delete an instance and its private data.
+ */
 function officehours_delete_instance(int $id): bool {
     global $DB;
     if (!$DB->record_exists("officehours", ["id" => $id])) {
@@ -75,7 +85,9 @@ function officehours_delete_instance(int $id): bool {
     return true;
 }
 
-/** Expose completion settings in cached course module metadata. */
+/**
+ * Expose completion settings in cached course module metadata.
+ */
 function officehours_get_coursemodule_info($coursemodule) {
     global $DB;
     $activity = $DB->get_record("officehours", ["id" => $coursemodule->instance]);
@@ -95,7 +107,9 @@ function officehours_get_coursemodule_info($coursemodule) {
     return $info;
 }
 
-/** Describe custom completion rules. */
+/**
+ * Describe custom completion rules.
+ */
 function officehours_get_completion_active_rule_descriptions($cm): array {
     global $DB;
     $instance = $DB->get_record("officehours", ["id" => $cm->instance]);
@@ -115,7 +129,9 @@ function officehours_get_completion_active_rule_descriptions($cm): array {
     return $rules;
 }
 
-/** Evaluate custom completion rules for a student. */
+/**
+ * Evaluate custom completion rules for a student.
+ */
 function officehours_get_completion_state($course, $cm, $userid, $type): bool {
     return \mod_officehours\local\completion_service::complete((int)$cm->instance, (int)$userid, (bool)$type);
 }

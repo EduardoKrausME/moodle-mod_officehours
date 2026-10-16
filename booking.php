@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Reservation and waiting-list actions.
@@ -30,6 +30,7 @@ $bookingid = optional_param("bookingid", 0, PARAM_INT);
 $offerid = optional_param("offerid", 0, PARAM_INT);
 $action = optional_param("action", "book", PARAM_ALPHA);
 [$cm, $course, $context, $activity] = \mod_officehours\local\access_manager::load($id);
+require_login($course, true, $cm);
 $PAGE->set_url(new moodle_url("/mod/officehours/booking.php", ["id" => $id]));
 $PAGE->set_context($context);
 $PAGE->set_title(get_string("reserve", "officehours"));

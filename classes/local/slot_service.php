@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Create availability slots and guard concurrency.
@@ -29,8 +29,13 @@ use DateTimeImmutable;
 use DateTimeZone;
 use core\lock\lock_config;
 
-/** Slot generation is idempotent and always uses UTC timestamps in storage. */
+/**
+ * Slot generation is idempotent and always uses UTC timestamps in storage.
+ */
 final class slot_service {
+    /**
+     * acquire in Office Hours.
+     */
     public static function acquire(int $slotid): \core\lock\lock {
         $factory = lock_config::get_lock_factory("mod_officehours");
         $lock = $factory->get_lock("slot_" . $slotid, 15);
@@ -40,6 +45,9 @@ final class slot_service {
         return $lock;
     }
 
+    /**
+     * expand in Office Hours.
+     */
     public static function expand(int $officehoursid, int $from, int $to): void {
         global $DB;
         $activity = $DB->get_record("officehours", ["id" => $officehoursid], "*", MUST_EXIST);
@@ -111,6 +119,9 @@ final class slot_service {
         }
     }
 
+    /**
+     * occupied in Office Hours.
+     */
     public static function occupied(int $slotid): int {
         global $DB;
         $params = ["slotid" => $slotid];
@@ -121,6 +132,9 @@ final class slot_service {
                 ["offered" => $slotid, "status" => "offered", "now" => time()]);
     }
 
+    /**
+     * open in Office Hours.
+     */
     public static function open(int $slotid): bool {
         global $DB;
         $slot = $DB->get_record("officehours_slot", ["id" => $slotid], "*", MUST_EXIST);

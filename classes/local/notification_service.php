@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Idempotent notification outbox using Moodle Message API.
@@ -27,8 +27,13 @@ namespace mod_officehours\local;
 use core\message\message;
 use core\lock\lock_config;
 
-/** Notifications are first persisted, then delivered by cron. */
+/**
+ * Notifications are first persisted, then delivered by cron.
+ */
 final class notification_service {
+    /**
+     * queue in Office Hours.
+     */
     private static function queue(int $officehoursid, int $bookingid, int $waitlistid,
             int $userid, string $eventkey): void {
         global $DB;
@@ -41,6 +46,9 @@ final class notification_service {
         }
     }
 
+    /**
+     * queue booking in Office Hours.
+     */
     public static function queue_booking(int $bookingid, string $action): void {
         global $DB;
         $booking = $DB->get_record("officehours_booking", ["id" => $bookingid], "*", MUST_EXIST);
@@ -51,6 +59,9 @@ final class notification_service {
         }
     }
 
+    /**
+     * queue offer in Office Hours.
+     */
     public static function queue_offer(int $offerid): void {
         global $DB;
         $entry = $DB->get_record("officehours_waitlist", ["id" => $offerid], "*", MUST_EXIST);
@@ -58,6 +69,9 @@ final class notification_service {
             "offer:" . $offerid . ":" . $entry->offereduntil);
     }
 
+    /**
+     * queue reminders in Office Hours.
+     */
     public static function queue_reminders(): void {
         global $DB;
         $sql = "SELECT b.* FROM {officehours_booking} b JOIN {officehours_slot} s ON s.id = b.slotid
@@ -78,6 +92,9 @@ final class notification_service {
         }
     }
 
+    /**
+     * flush in Office Hours.
+     */
     public static function flush(): void {
         global $DB;
         $pending = $DB->get_records("officehours_notification", ["sent" => 0], "id ASC", "*", 0, 100);
