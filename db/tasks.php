@@ -25,6 +25,6 @@
 defined("MOODLE_INTERNAL") || die();
 
 $tasks = [
-    ["classname" => "\mod_officehours\task\maintenance", "blocking" => 0,
+    ["classname" => "\\mod_officehours\\task\\maintenance", "blocking" => 0,
         "minute" => "*/5", "hour" => "*", "day" => "*", "month" => "*", "dayofweek" => "*"],
 ];
