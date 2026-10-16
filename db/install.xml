@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="mod/officehours/db" VERSION="2026101500" COMMENT="Office hours activity tables" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
+  <TABLES>
+    <TABLE NAME="officehours" COMMENT="officehours records">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true"/>
+        <FIELD NAME="intro" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="introformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="modality" TYPE="char" LENGTH="16" NOTNULL="true" DEFAULT="online"/>
+        <FIELD NAME="slotduration" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="30"/>
+        <FIELD NAME="capacity" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1"/>
+        <FIELD NAME="bufferminutes" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="minnotice" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="60"/>
+        <FIELD NAME="maxnotice" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="43200"/>
+        <FIELD NAME="cancelnotice" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="60"/>
+        <FIELD NAME="maxbookings" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="3"/>
+        <FIELD NAME="allowreschedule" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1"/>
+        <FIELD NAME="waitlistenabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1"/>
+        <FIELD NAME="approvalrequired" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="showbusy" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="allowsubject" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1"/>
+        <FIELD NAME="additionalinfo" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="location" TYPE="char" LENGTH="255" NOTNULL="false"/>
+        <FIELD NAME="meetingurl" TYPE="char" LENGTH="500" NOTNULL="false"/>
+        <FIELD NAME="timeopen" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="timeclose" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="offerexpires" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="120"/>
+        <FIELD NAME="reminderminutes" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="60"/>
+        <FIELD NAME="completionbooked" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="completionattended" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="completioncount" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="course_ix" UNIQUE="false" FIELDS="course"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="officehours_availability" COMMENT="officehours_availability records">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="officehoursid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="teacherid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="kind" TYPE="char" LENGTH="16" NOTNULL="true" DEFAULT="weekly"/>
+        <FIELD NAME="weekday" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="1"/>
+        <FIELD NAME="startdate" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="enddate" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="startminute" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="endminute" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="timezone" TYPE="char" LENGTH="100" NOTNULL="true" DEFAULT="UTC"/>
+        <FIELD NAME="capacity" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="enabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="officehours_fk" TYPE="foreign" FIELDS="officehoursid" REFTABLE="officehours" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="activity_teacher_ix" UNIQUE="false" FIELDS="officehoursid, teacherid"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="officehours_exception" COMMENT="officehours_exception records">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="officehoursid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="teacherid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="starttime" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="endtime" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="reason" TYPE="char" LENGTH="255" NOTNULL="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="officehours_fk" TYPE="foreign" FIELDS="officehoursid" REFTABLE="officehours" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="activity_time_ix" UNIQUE="false" FIELDS="officehoursid, starttime"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="officehours_slot" COMMENT="officehours_slot records">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="officehoursid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="availabilityid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="teacherid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="starttime" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="endtime" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="capacity" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1"/>
+        <FIELD NAME="disabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="officehours_fk" TYPE="foreign" FIELDS="officehoursid" REFTABLE="officehours" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="unique_slot" UNIQUE="true" FIELDS="officehoursid, teacherid, starttime"/>
+        <INDEX NAME="future_ix" UNIQUE="false" FIELDS="officehoursid, starttime"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="officehours_booking" COMMENT="officehours_booking records">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="officehoursid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="slotid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="state" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="pending"/>
+        <FIELD NAME="subject" TYPE="char" LENGTH="255" NOTNULL="false"/>
+        <FIELD NAME="notes" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="internalnotes" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="outcome" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="created" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="modified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="remindersent" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="officehours_fk" TYPE="foreign" FIELDS="officehoursid" REFTABLE="officehours" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="activity_user_ix" UNIQUE="false" FIELDS="officehoursid, userid"/>
+        <INDEX NAME="slot_state_ix" UNIQUE="false" FIELDS="slotid, state"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="officehours_waitlist" COMMENT="officehours_waitlist records">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="officehoursid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="slotid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="waiting"/>
+        <FIELD NAME="created" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="offereduntil" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="modified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="officehours_fk" TYPE="foreign" FIELDS="officehoursid" REFTABLE="officehours" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="waiting_ix" UNIQUE="false" FIELDS="slotid, status, created"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="officehours_notification" COMMENT="officehours_notification records">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="officehoursid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="bookingid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="waitlistid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="eventkey" TYPE="char" LENGTH="100" NOTNULL="true"/>
+        <FIELD NAME="created" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="sent" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="officehours_fk" TYPE="foreign" FIELDS="officehoursid" REFTABLE="officehours" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="event_unique" UNIQUE="true" FIELDS="eventkey"/>
+        <INDEX NAME="pending_ix" UNIQUE="false" FIELDS="sent"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="officehours_calendar" COMMENT="officehours_calendar records">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="officehoursid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="bookingid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="eventid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="officehours_fk" TYPE="foreign" FIELDS="officehoursid" REFTABLE="officehours" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="private_event" UNIQUE="true" FIELDS="bookingid, userid"/>
+      </INDEXES>
+    </TABLE>
+  </TABLES>
+</XMLDB>

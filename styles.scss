@@ -1,0 +1,40 @@
+// Accessible scheduling interface using Moodle theme variables.
+.officehours {
+    --officehours-border: var(--bs-border-color, #d5dbe1);
+    --officehours-background: var(--bs-body-bg, #fff);
+    color: var(--bs-body-color, inherit);
+    max-width: 1200px;
+    margin-inline: auto;
+    &__heading, &__nav, &__actions, &__slot, &__booking, &__period {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+    &__intro { max-width: 70ch; }
+    &__nav { margin-block: 2rem 1rem; }
+    &__actions, &__teachers, &__slotactions { display: flex; gap: .5rem; flex-wrap: wrap; }
+    &__teachers { margin-bottom: 1rem; }
+    &__filter { padding: .4rem .7rem; border: 1px solid var(--officehours-border); border-radius: .5rem; }
+    &__slots, &__mybookings, &__teacherbookings { display: grid; gap: .75rem; margin-bottom: 2rem; }
+    &__slot, &__booking {
+        border: 1px solid var(--officehours-border);
+        background: var(--officehours-background);
+        border-radius: .75rem;
+        padding: 1rem 1.25rem;
+    }
+    &__time { font-size: 1.15rem; font-weight: 600; }
+    &__teacher { opacity: .8; }
+    &__summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: .75rem; margin: 1.5rem 0; }
+    &__stat { display: flex; flex-direction: column; border: 1px solid var(--officehours-border); border-radius: .75rem; padding: 1rem; }
+    &__stat strong { font-size: 1.6rem; }
+    &__bookingform { display: grid; gap: .4rem; min-width: min(100%, 320px); }
+    &__search { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; margin-top: 1rem; }
+    button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid var(--bs-primary, #226aa6); outline-offset: 2px; }
+    @media (max-width: 680px) {
+        &__slot, &__booking { align-items: flex-start; flex-direction: column; }
+        &__slotactions, &__bookingform { width: 100%; }
+        &__slotactions > a, &__slotactions button { flex-grow: 1; }
+    }
+}

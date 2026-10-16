@@ -1,0 +1,18 @@
+.officehours{--officehours-border:var(--bs-border-color,#d5dbe1);--officehours-background:var(--bs-body-bg,#fff);color:var(--bs-body-color,inherit);max-width:1200px;margin-inline:auto}
+.officehours__heading,.officehours__nav,.officehours__actions,.officehours__slot,.officehours__booking,.officehours__period{display:flex;gap:1rem;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.officehours__intro{max-width:70ch}
+.officehours__nav{margin-block:2rem 1rem}
+.officehours__actions,.officehours__teachers,.officehours__slotactions{display:flex;gap:.5rem;flex-wrap:wrap}
+.officehours__teachers{margin-bottom:1rem}
+.officehours__filter{padding:.4rem .7rem;border:1px solid var(--officehours-border);border-radius:.5rem}
+.officehours__slots,.officehours__mybookings,.officehours__teacherbookings{display:grid;gap:.75rem;margin-bottom:2rem}
+.officehours__slot,.officehours__booking{border:1px solid var(--officehours-border);background:var(--officehours-background);border-radius:.75rem;padding:1rem 1.25rem}
+.officehours__time{font-size:1.15rem;font-weight:600}
+.officehours__teacher{opacity:.8}
+.officehours__summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.75rem;margin:1.5rem 0}
+.officehours__stat{display:flex;flex-direction:column;border:1px solid var(--officehours-border);border-radius:.75rem;padding:1rem}
+.officehours__stat strong{font-size:1.6rem}
+.officehours__bookingform{display:grid;gap:.4rem;min-width:min(100%,320px)}
+.officehours__search{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;margin-top:1rem}
+.officehours button:focus-visible,.officehours a:focus-visible,.officehours input:focus-visible{outline:3px solid var(--bs-primary,#226aa6);outline-offset:2px}
+@media(max-width:680px){.officehours__slot,.officehours__booking{align-items:flex-start;flex-direction:column}.officehours__slotactions,.officehours__bookingform{width:100%}.officehours__slotactions>a,.officehours__slotactions button{flex-grow:1}}

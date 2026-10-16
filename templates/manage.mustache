@@ -1,0 +1,28 @@
+<section class="officehours" aria-label="{{title}}">
+    <div class="officehours__heading"><h2>{{title}}</h2>
+        <a href="{{exporturl}}" class="btn btn-outline-primary">{{export}}</a>
+    </div>
+    <nav class="officehours__period" aria-label="{{title}}">{{#periods}}<a class="btn btn-outline-secondary" href="{{url}}">{{label}}</a>{{/periods}}</nav>
+    <form class="officehours__search" method="get" action="{{actionurl}}">
+        <input type="hidden" name="id" value="{{cmid}}">
+        <label for="officehours-search">{{searchlabel}}</label>
+        <input class="form-control" id="officehours-search" type="search" name="search" value="{{query}}">
+        <button type="submit" class="btn btn-outline-primary">{{filterlabel}}</button>
+    </form>
+    <div class="officehours__summary">{{#counts}}<article class="officehours__stat"><strong>{{count}}</strong><span>{{status}}</span></article>{{/counts}}</div>
+    <div class="officehours__teacherbookings">{{#records}}<article class="officehours__booking">
+        <div class="officehours__bookingdetails"><strong>{{student}}</strong>
+            <span>{{date}}</span><span class="badge badge-info">{{state}}</span><p>{{subject}}</p>
+        </div>{{#hasoptions}}<form action="{{actionurl}}" method="post" class="officehours__bookingform">
+            <input type="hidden" name="id" value="{{cmid}}"><input type="hidden" name="bookingid" value="{{id}}">
+            <input type="hidden" name="action" value="update"><input type="hidden" name="sesskey" value="{{sesskey}}">
+            <label for="status-{{id}}">{{statuslabel}}</label><select name="status" id="status-{{id}}" class="form-control">
+                {{#options}}<option value="{{value}}">{{name}}</option>{{/options}}</select>
+            <label for="notes-{{id}}">{{noteslabel}}</label><textarea class="form-control" id="notes-{{id}}" name="internalnotes">{{notes}}</textarea>
+            <label for="outcome-{{id}}">{{outcomelabel}}</label><textarea class="form-control" id="outcome-{{id}}" name="outcome">{{outcome}}</textarea>
+            <button class="btn btn-primary" type="submit">{{savelabel}}</button>
+        </form>{{/hasoptions}}
+    </article>{{/records}}</div>
+    <h3>{{waittitle}}</h3><div class="officehours__wait">{{#wait}}<article class="officehours__slot"><strong>{{student}}</strong>
+        <span>{{status}}</span><span>{{created}}</span></article>{{/wait}}</div>
+</section>
