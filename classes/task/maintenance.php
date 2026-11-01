@@ -24,10 +24,14 @@
 
 namespace mod_officehours\task;
 
+use core\task\scheduled_task;
+use mod_officehours\local\notification_service;
+use mod_officehours\local\waiting_list_service;
+
 /**
  * Reconcile time-based tasks without duplicated offers.
  */
-final class maintenance extends \core\task\scheduled_task {
+final class maintenance extends scheduled_task {
     /**
      * get name in Office Hours.
      */
@@ -39,8 +43,8 @@ final class maintenance extends \core\task\scheduled_task {
      * execute in Office Hours.
      */
     public function execute(): void {
-        \mod_officehours\local\waiting_list_service::expire_and_promote();
-        \mod_officehours\local\notification_service::queue_reminders();
-        \mod_officehours\local\notification_service::flush();
+        waiting_list_service::expire_and_promote();
+        notification_service::queue_reminders();
+        notification_service::flush();
     }
 }

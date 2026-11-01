@@ -22,13 +22,16 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use mod_officehours\local\access_manager;
+use mod_officehours\local\slot_service;
+
 require_once("../../config.php");
 
 $id = required_param("id", PARAM_INT);
 $day = optional_param("day", time(), PARAM_INT);
 $teacher = optional_param("teacher", 0, PARAM_INT);
 $rescheduleid = optional_param("reschedule", 0, PARAM_INT);
-[$cm, $course, $context, $activity] = \mod_officehours\local\access_manager::load($id);
+[$cm, $course, $context, $activity] = access_manager::load($id);
 require_login($course, true, $cm);
 $PAGE->set_url(new moodle_url("/mod/officehours/view.php", ["id" => $id]));
 $PAGE->set_context($context);
@@ -39,7 +42,7 @@ $completion = new completion_info($course);
 $completion->set_module_viewed($cm);
 $start = (int)(floor($day / DAYSECS) * DAYSECS);
 $end = $start + 14 * DAYSECS;
-\mod_officehours\local\slot_service::expand((int)$activity->id, max(time(), $start), $end);
+slot_service::expand((int)$activity->id, max(time(), $start), $end);
 $slots = $DB->get_records_select("officehours_slot",
     "officehoursid = :officeid AND starttime >= :fromtime AND starttime < :totime AND disabled = 0",
     ["officeid" => $activity->id, "fromtime" => $start, "totime" => $end], "starttime ASC, id ASC");
@@ -54,7 +57,7 @@ foreach ($slots as $slot) {
     if ($teacher && $teacher != $slot->teacherid) {
         continue;
     }
-    $occupied = \mod_officehours\local\slot_service::occupied((int)$slot->id);
+    $occupied = slot_service::occupied((int)$slot->id);
     $available = $occupied < $slot->capacity;
     if (!$available && !$activity->showbusy && !$activity->waitlistenabled) {
         continue;

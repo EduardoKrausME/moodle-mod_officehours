@@ -25,6 +25,7 @@
 namespace mod_officehours\local;
 
 use context_module;
+use required_capability_exception;
 use stdClass;
 
 /**
@@ -65,7 +66,7 @@ final class access_manager {
         }
         global $USER;
         if ($teacherid !== (int)$USER->id) {
-            throw new \required_capability_exception(context_module::instance($cm->id),
+            throw new required_capability_exception(context_module::instance($cm->id),
                 "mod/officehours:manage", "nopermissions", "");
         }
     }

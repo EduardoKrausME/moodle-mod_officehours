@@ -22,8 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-// phpcs:ignore moodle.Files.MoodleInternal.MoodleInternalGlobalState -- Mandatory double-quoted guard.
-defined("MOODLE_INTERNAL") || die();
+use mod_officehours\local\calendar_service;
+use mod_officehours\local\completion_service;
 
 /**
  * Office Hours callback.
@@ -75,7 +75,7 @@ function officehours_delete_instance(int $id): bool {
     $transaction = $DB->start_delegated_transaction();
     $bookings = $DB->get_records("officehours_booking", ["officehoursid" => $id]);
     foreach ($bookings as $booking) {
-        \mod_officehours\local\calendar_service::remove((int)$booking->id);
+        calendar_service::remove((int)$booking->id);
     }
     foreach (["notification", "waitlist", "booking", "slot", "exception", "availability"] as $table) {
         $DB->delete_records("officehours_" . $table, ["officehoursid" => $id]);
@@ -133,5 +133,5 @@ function officehours_get_completion_active_rule_descriptions($cm): array {
  * Evaluate custom completion rules for a student.
  */
 function officehours_get_completion_state($course, $cm, $userid, $type): bool {
-    return \mod_officehours\local\completion_service::complete((int)$cm->instance, (int)$userid, (bool)$type);
+    return completion_service::complete((int)$cm->instance, (int)$userid, (bool)$type);
 }

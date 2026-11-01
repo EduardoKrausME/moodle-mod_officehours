@@ -24,10 +24,12 @@
 
 namespace mod_officehours\local;
 
+use core\lock\lock;
 use DateInterval;
 use DateTimeImmutable;
 use DateTimeZone;
 use core\lock\lock_config;
+use moodle_exception;
 
 /**
  * Slot generation is idempotent and always uses UTC timestamps in storage.
@@ -36,11 +38,11 @@ final class slot_service {
     /**
      * acquire in Office Hours.
      */
-    public static function acquire(int $slotid): \core\lock\lock {
+    public static function acquire(int $slotid): lock {
         $factory = lock_config::get_lock_factory("mod_officehours");
         $lock = $factory->get_lock("slot_" . $slotid, 15);
         if (!$lock) {
-            throw new \moodle_exception("lockfailed", "officehours");
+            throw new moodle_exception("lockfailed", "officehours");
         }
         return $lock;
     }
@@ -56,7 +58,7 @@ final class slot_service {
         $factory = lock_config::get_lock_factory("mod_officehours");
         $lock = $factory->get_lock("expand_" . $officehoursid, 20);
         if (!$lock) {
-            throw new \moodle_exception("lockfailed", "officehours");
+            throw new moodle_exception("lockfailed", "officehours");
         }
         try {
             foreach ($rules as $rule) {

@@ -30,16 +30,19 @@ use core_privacy\local\metadata\collection;
 use core_privacy\local\request\approved_contextlist;
 use core_privacy\local\request\approved_userlist;
 use core_privacy\local\request\contextlist;
+use core_privacy\local\request\core_user_data_provider;
+use core_privacy\local\request\core_userlist_provider;
 use core_privacy\local\request\userlist;
 use core_privacy\local\request\writer;
+use mod_officehours\local\calendar_service;
 
 /**
  * Privacy provider for student and staff scheduling data.
  */
 final class provider implements
         \core_privacy\local\metadata\provider,
-        \core_privacy\local\request\core_user_data_provider,
-        \core_privacy\local\request\core_userlist_provider {
+        core_user_data_provider,
+        core_userlist_provider {
 
     /**
      * get metadata in Office Hours.
@@ -157,7 +160,7 @@ final class provider implements
         $bookings = $DB->get_records_select("officehours_booking",
             "officehoursid = :officeid AND userid " . $insql, $params);
         foreach ($bookings as $booking) {
-            \mod_officehours\local\calendar_service::remove((int)$booking->id);
+            calendar_service::remove((int)$booking->id);
             $DB->delete_records("officehours_notification", ["bookingid" => $booking->id]);
             $DB->delete_records("officehours_booking", ["id" => $booking->id]);
         }
@@ -192,7 +195,7 @@ final class provider implements
         }
         $rows = $DB->get_records("officehours_booking", ["officehoursid" => $cm->instance]);
         foreach ($rows as $record) {
-            \mod_officehours\local\calendar_service::remove((int)$record->id);
+            calendar_service::remove((int)$record->id);
         }
         foreach (["calendar", "notification", "waitlist", "booking", "exception", "slot", "availability"] as $table) {
             $DB->delete_records("officehours_" . $table, ["officehoursid" => $cm->instance]);

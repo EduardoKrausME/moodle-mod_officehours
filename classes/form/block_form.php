@@ -24,14 +24,15 @@
 
 namespace mod_officehours\form;
 
-// phpcs:ignore moodle.Files.MoodleInternal.MoodleInternalGlobalState -- Mandatory double-quoted guard.
-defined("MOODLE_INTERNAL") || die();
+use moodleform;
+
+defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . "/formslib.php");
 
 /**
  * Mark an unbooked period unavailable.
  */
-final class block_form extends \moodleform {
+final class block_form extends moodleform {
     /**
      * definition in Office Hours.
      */

@@ -24,6 +24,9 @@
 
 namespace mod_officehours\local;
 
+use calendar_event;
+use Throwable;
+
 /**
  * One private user event per booking participant.
  */
@@ -58,9 +61,9 @@ final class calendar_service {
                 "visible" => 1,
             ];
             if ($previous) {
-                \calendar_event::load($previous->eventid)->update($data, false);
+                calendar_event::load($previous->eventid)->update($data, false);
             } else {
-                $event = \calendar_event::create($data, false);
+                $event = calendar_event::create($data, false);
                 $DB->insert_record("officehours_calendar", (object)[
                     "officehoursid" => $activity->id, "bookingid" => $bookingid,
                     "userid" => $userid, "eventid" => $event->id,
@@ -70,7 +73,7 @@ final class calendar_service {
         $old = $DB->get_records("officehours_calendar", ["bookingid" => $bookingid]);
         foreach ($old as $row) {
             if (!in_array((int)$row->userid, $recipients, true)) {
-                \calendar_event::load($row->eventid)->delete();
+                calendar_event::load($row->eventid)->delete();
                 $DB->delete_records("officehours_calendar", ["id" => $row->id]);
             }
         }
@@ -83,8 +86,8 @@ final class calendar_service {
         global $DB;
         foreach ($DB->get_records("officehours_calendar", ["bookingid" => $bookingid]) as $row) {
             try {
-                \calendar_event::load($row->eventid)->delete();
-            } catch (\Throwable $exception) {
+                calendar_event::load($row->eventid)->delete();
+            } catch (Throwable $exception) {
                 debugging($exception->getMessage(), DEBUG_DEVELOPER);
             }
             $DB->delete_records("officehours_calendar", ["id" => $row->id]);

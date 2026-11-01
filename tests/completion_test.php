@@ -24,12 +24,13 @@
 
 namespace mod_officehours;
 
+use advanced_testcase;
 use mod_officehours\local\completion_service;
 
 /**
  * Automatic completion based on reservation state.
  */
-final class completion_test extends \advanced_testcase {
+final class completion_test extends advanced_testcase {
     /**
      * Document the Office Hours behaviour.
      * @covers \mod_officehours\local\completion_service::complete

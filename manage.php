@@ -22,6 +22,10 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use mod_officehours\local\access_manager;
+use mod_officehours\local\booking_service;
+use mod_officehours\local\report_service;
+
 require_once("../../config.php");
 
 $id = required_param("id", PARAM_INT);
@@ -32,9 +36,9 @@ $groupid = optional_param("groupid", 0, PARAM_INT);
 $search = optional_param("search", "", PARAM_TEXT);
 $action = optional_param("action", "", PARAM_ALPHA);
 $bookingid = optional_param("bookingid", 0, PARAM_INT);
-[$cm, $course, $context, $activity] = \mod_officehours\local\access_manager::load($id);
+[$cm, $course, $context, $activity] = access_manager::load($id);
 require_login($course, true, $cm);
-\mod_officehours\local\access_manager::capability($cm, "viewbookings");
+access_manager::capability($cm, "viewbookings");
 $PAGE->set_url(new moodle_url("/mod/officehours/manage.php", ["id" => $id]));
 $PAGE->set_context($context);
 $PAGE->set_title(get_string("teacherpanel", "officehours"));
@@ -43,7 +47,7 @@ if ($action === "update") {
     $status = required_param("status", PARAM_ALPHAEXT);
     $internalnotes = optional_param("internalnotes", "", PARAM_TEXT);
     $outcome = optional_param("outcome", "", PARAM_TEXT);
-    \mod_officehours\local\booking_service::change_state($bookingid, $status, (int)$USER->id,
+    booking_service::change_state($bookingid, $status, (int)$USER->id,
         $internalnotes, $outcome);
     redirect(new moodle_url("/mod/officehours/manage.php", ["id" => $id]),
         get_string("changesaved", "officehours"));
@@ -51,9 +55,9 @@ if ($action === "update") {
 $day = (int)(floor($from / DAYSECS) * DAYSECS);
 $span = ["day" => DAYSECS, "week" => WEEKSECS, "month" => 31 * DAYSECS][$period] ?? WEEKSECS;
 if (optional_param("export", 0, PARAM_BOOL)) {
-    \mod_officehours\local\report_service::export($cm, $day, $day + $span, $studentid);
+    report_service::export($cm, $day, $day + $span, $studentid);
 }
-$bookings = \mod_officehours\local\report_service::bookings($cm, $day, $day + $span, $studentid);
+$bookings = report_service::bookings($cm, $day, $day + $span, $studentid);
 $counts = array_fill_keys(["pending", "confirmed", "completed", "no-show", "cancelled", "rejected"], 0);
 $records = [];
 foreach ($bookings as $booking) {
@@ -82,7 +86,7 @@ foreach ($bookings as $booking) {
 $waitentries = $DB->get_records("officehours_waitlist", ["officehoursid" => $activity->id], "created ASC", "*", 0, 100);
 $wait = [];
 foreach ($waitentries as $entry) {
-    if (\mod_officehours\local\access_manager::visible_student($cm, (int)$entry->userid, (int)$USER->id)) {
+    if (access_manager::visible_student($cm, (int)$entry->userid, (int)$USER->id)) {
         $wait[] = ["student" => fullname($DB->get_record("user", ["id" => $entry->userid], "*", MUST_EXIST)),
             "status" => $entry->status, "created" => userdate($entry->created)];
     }

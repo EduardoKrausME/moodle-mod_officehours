@@ -24,13 +24,15 @@
 
 namespace mod_officehours;
 
+use advanced_testcase;
 use mod_officehours\local\booking_service;
 use mod_officehours\local\slot_service;
+use moodle_exception;
 
 /**
  * Database-backed reservation checks.
  */
-final class booking_test extends \advanced_testcase {
+final class booking_test extends advanced_testcase {
     /**
      * Verify booking constraints and capacity.
      *
@@ -61,11 +63,11 @@ final class booking_test extends \advanced_testcase {
         try {
             booking_service::book((int)$activity->id, $slotid, $student1->id);
             $this->fail("Duplicate booking was accepted");
-        } catch (\moodle_exception $exception) {
+        } catch (moodle_exception $exception) {
             $this->assertSame("duplicatebooking", $exception->errorcode);
         }
         $this->setUser($student2);
-        $this->expectException(\moodle_exception::class);
+        $this->expectException(moodle_exception::class);
         booking_service::book((int)$activity->id, $slotid, $student2->id);
     }
 
@@ -93,7 +95,7 @@ final class booking_test extends \advanced_testcase {
         $bookingid = booking_service::book((int)$activity->id, $slotid, $student->id);
         booking_service::change_state($bookingid, "cancelled", $student->id);
         $this->setUser($teacher);
-        $this->expectException(\moodle_exception::class);
+        $this->expectException(moodle_exception::class);
         booking_service::change_state($bookingid, "confirmed", $teacher->id);
     }
 }

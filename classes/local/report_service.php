@@ -24,6 +24,8 @@
 
 namespace mod_officehours\local;
 
+use stdClass;
+
 /**
  * Restrict reporting to authorized bookings.
  */
@@ -31,7 +33,7 @@ final class report_service {
     /**
      * bookings in Office Hours.
      */
-    public static function bookings(\stdClass $cm, int $from, int $to, int $studentid = 0): array {
+    public static function bookings(stdClass $cm, int $from, int $to, int $studentid = 0): array {
         global $DB, $USER;
         access_manager::capability($cm, "viewbookings");
         $params = ["officeid" => $cm->instance, "start" => $from, "end" => $to];
@@ -57,7 +59,7 @@ final class report_service {
     /**
      * export in Office Hours.
      */
-    public static function export(\stdClass $cm, int $from, int $to, int $studentid = 0): void {
+    public static function export(stdClass $cm, int $from, int $to, int $studentid = 0): void {
         access_manager::capability($cm, "reports");
         $rows = self::bookings($cm, $from, $to, $studentid);
         $filename = "officehours-" . $cm->instance . ".csv";

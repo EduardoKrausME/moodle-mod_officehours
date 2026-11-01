@@ -23,7 +23,7 @@
  */
 
 // phpcs:ignore moodle.Files.MoodleInternal.MoodleInternalGlobalState -- Mandatory double-quoted guard.
-defined("MOODLE_INTERNAL") || die();
+defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot . "/mod/officehours/backup/moodle2/restore_officehours_activity_structure_step.class.php");
 
 /**

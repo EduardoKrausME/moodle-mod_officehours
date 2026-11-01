@@ -24,6 +24,7 @@
 
 namespace mod_officehours\completion;
 
+use coding_exception;
 use core_completion\activity_custom_completion;
 
 /**
@@ -56,7 +57,7 @@ final class custom_completion extends activity_custom_completion {
     public function get_state(string $rule): int {
         global $DB;
         if (!in_array($rule, self::get_defined_custom_rules(), true)) {
-            throw new \coding_exception("Unknown completion condition");
+            throw new coding_exception("Unknown completion condition");
         }
         $activity = $DB->get_record("officehours", ["id" => $this->cm->instance], "*", MUST_EXIST);
         $confirmed = $DB->count_records_select("officehours_booking",

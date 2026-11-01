@@ -24,6 +24,11 @@
 
 namespace mod_officehours\local;
 
+use core\lock\lock_config;
+use DateTimeZone;
+use invalid_parameter_exception;
+use moodle_exception;
+
 /**
  * Server-side availability mutations, preserving booked history.
  */
@@ -36,14 +41,14 @@ final class availability_service {
         access_manager::teacher($officehoursid, $teacherid, "createavailability");
         if ($data["startminute"] < 0 || $data["endminute"] > 1440 || $data["startminute"] >= $data["endminute"] ||
                 $data["enddate"] < $data["startdate"] || !in_array($data["kind"], ["single", "weekly"], true)) {
-            throw new \invalid_parameter_exception("Invalid availability range");
+            throw new invalid_parameter_exception("Invalid availability range");
         }
-        new \DateTimeZone($data["timezone"]);
+        new DateTimeZone($data["timezone"]);
         if ($id) {
             $original = $DB->get_record("officehours_availability",
                 ["id" => $id, "officehoursid" => $officehoursid], "*", MUST_EXIST);
             if ((int)$original->teacherid !== $teacherid) {
-                throw new \invalid_parameter_exception("Ownership mismatch");
+                throw new invalid_parameter_exception("Ownership mismatch");
             }
             // Existing slots remain unchanged: future booked appointments are never silently moved.
             $DB->update_record("officehours_availability", (object)array_merge($data, [
@@ -64,12 +69,12 @@ final class availability_service {
         global $DB;
         access_manager::teacher($officehoursid, $teacherid, "createavailability");
         if ($from >= $to || $to <= time()) {
-            throw new \invalid_parameter_exception("Invalid block window");
+            throw new invalid_parameter_exception("Invalid block window");
         }
-        $expandlock = \core\lock\lock_config::get_lock_factory("mod_officehours")
+        $expandlock = lock_config::get_lock_factory("mod_officehours")
             ->get_lock("expand_" . $officehoursid, 20);
         if (!$expandlock) {
-            throw new \moodle_exception("lockfailed", "officehours");
+            throw new moodle_exception("lockfailed", "officehours");
         }
         $locks = [];
         try {
@@ -83,7 +88,7 @@ final class availability_service {
             $transaction = $DB->start_delegated_transaction();
             foreach ($slots as $slot) {
                 if (slot_service::occupied($slot->id)) {
-                    throw new \moodle_exception("blockbooked", "officehours");
+                    throw new moodle_exception("blockbooked", "officehours");
                 }
                 $DB->set_field("officehours_slot", "disabled", 1, ["id" => $slot->id]);
             }
@@ -109,10 +114,10 @@ final class availability_service {
         access_manager::teacher($officehoursid, $teacherid, "createavailability");
         $rule = $DB->get_record("officehours_availability", ["id" => $id,
             "officehoursid" => $officehoursid, "teacherid" => $teacherid], "*", MUST_EXIST);
-        $expandlock = \core\lock\lock_config::get_lock_factory("mod_officehours")
+        $expandlock = lock_config::get_lock_factory("mod_officehours")
             ->get_lock("expand_" . $officehoursid, 20);
         if (!$expandlock) {
-            throw new \moodle_exception("lockfailed", "officehours");
+            throw new moodle_exception("lockfailed", "officehours");
         }
         try {
             $slots = $DB->get_records_select("officehours_slot", "availabilityid = :rule AND starttime > :now",

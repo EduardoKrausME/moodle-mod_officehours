@@ -24,6 +24,10 @@
 
 namespace mod_officehours\local;
 
+use context_module;
+use moodle_exception;
+use stdClass;
+
 /**
  * Transactional booking state machine.
  */
@@ -68,11 +72,11 @@ final class booking_service {
     /**
      * validate window in Office Hours.
      */
-    private static function validate_window(\stdClass $activity, \stdClass $slot, bool $cancel = false): void {
+    private static function validate_window(stdClass $activity, stdClass $slot, bool $cancel = false): void {
         $now = time();
         if ($cancel) {
             if ($slot->starttime - $now < (int)$activity->cancelnotice * 60) {
-                throw new \moodle_exception("cancellationclosed", "officehours");
+                throw new moodle_exception("cancellationclosed", "officehours");
             }
             return;
         }
@@ -80,21 +84,21 @@ final class booking_service {
                 $slot->starttime > $now + (int)$activity->maxnotice * 60 ||
                 ($activity->timeopen && $slot->starttime < $activity->timeopen) ||
                 ($activity->timeclose && $slot->endtime > $activity->timeclose)) {
-            throw new \moodle_exception("bookingclosed", "officehours");
+            throw new moodle_exception("bookingclosed", "officehours");
         }
     }
 
     /**
      * validate student in Office Hours.
      */
-    private static function validate_student(\stdClass $cm, int $userid): void {
+    private static function validate_student(stdClass $cm, int $userid): void {
         global $USER;
         if ((int)$USER->id !== $userid) {
-            throw new \moodle_exception("nopermissions", "error", "", "Cannot book for another user");
+            throw new moodle_exception("nopermissions", "error", "", "Cannot book for another user");
         }
         access_manager::capability($cm, "book");
-        if (!is_enrolled(\context_module::instance($cm->id), $userid)) {
-            throw new \moodle_exception("notenrolled", "error");
+        if (!is_enrolled(context_module::instance($cm->id), $userid)) {
+            throw new moodle_exception("notenrolled", "error");
         }
     }
 
@@ -106,20 +110,20 @@ final class booking_service {
         if ($DB->record_exists_select("officehours_booking",
                 "slotid = :slot AND userid = :student AND state IN ('pending', 'confirmed') AND id <> :exclude",
                 ["slot" => $slotid, "student" => $userid, "exclude" => $excludedid])) {
-            throw new \moodle_exception("duplicatebooking", "officehours");
+            throw new moodle_exception("duplicatebooking", "officehours");
         }
     }
 
     /**
      * limit in Office Hours.
      */
-    private static function limit(\stdClass $activity, int $userid, int $excludedid = 0): void {
+    private static function limit(stdClass $activity, int $userid, int $excludedid = 0): void {
         global $DB;
         $count = $DB->count_records_select("officehours_booking",
             "officehoursid = :office AND userid = :student AND id <> :exclude AND state IN ('pending', 'confirmed')",
             ["office" => $activity->id, "student" => $userid, "exclude" => $excludedid]);
         if ($count >= $activity->maxbookings) {
-            throw new \moodle_exception("bookinglimit", "officehours");
+            throw new moodle_exception("bookinglimit", "officehours");
         }
     }
 
@@ -146,14 +150,14 @@ final class booking_service {
                 $offer = $DB->get_record("officehours_waitlist", ["id" => $offerid, "slotid" => $slotid,
                     "userid" => $userid, "status" => "offered"], "*", MUST_EXIST);
                 if ($offer->offereduntil <= time()) {
-                    throw new \moodle_exception("offerexpired", "officehours");
+                    throw new moodle_exception("offerexpired", "officehours");
                 }
                 $DB->set_field("officehours_waitlist", "status", "accepted", ["id" => $offerid]);
             }
             if (slot_service::occupied($slotid) >= $slot->capacity) {
                 // Exactly one active offered seat belongs to this student, otherwise the slot is full.
                 if (!$offerid || slot_service::occupied($slotid) > $slot->capacity) {
-                    throw new \moodle_exception("slotfull", "officehours");
+                    throw new moodle_exception("slotfull", "officehours");
                 }
             }
             $state = $activity->approvalrequired ? self::PENDING : self::CONFIRMED;
@@ -181,7 +185,7 @@ final class booking_service {
         global $DB;
         global $USER;
         if ((int)$USER->id !== $actorid) {
-            throw new \moodle_exception("nopermissions", "error");
+            throw new moodle_exception("nopermissions", "error");
         }
         $old = $DB->get_record("officehours_booking", ["id" => $bookingid], "*", MUST_EXIST);
         $lock = slot_service::acquire((int)$old->slotid);
@@ -189,10 +193,10 @@ final class booking_service {
             $transaction = $DB->start_delegated_transaction();
             $booking = $DB->get_record("officehours_booking", ["id" => $bookingid], "*", MUST_EXIST);
             if ((int)$booking->slotid !== (int)$old->slotid) {
-                throw new \moodle_exception("staleoperation", "officehours");
+                throw new moodle_exception("staleoperation", "officehours");
             }
             if (!in_array($state, self::ALLOWED[$booking->state] ?? [], true)) {
-                throw new \moodle_exception("invalidtransition", "officehours");
+                throw new moodle_exception("invalidtransition", "officehours");
             }
             $cm = get_coursemodule_from_instance("officehours", $booking->officehoursid, 0, false, MUST_EXIST);
             $activity = $DB->get_record("officehours", ["id" => $booking->officehoursid], "*", MUST_EXIST);
@@ -204,12 +208,12 @@ final class booking_service {
                 access_manager::teacher((int)$booking->officehoursid, (int)$slot->teacherid,
                     in_array($state, [self::COMPLETED, self::NOSHOW], true) ? "attendance" : "approve");
                 if (!access_manager::visible_student($cm, (int)$booking->userid, $actorid)) {
-                    throw new \moodle_exception("nopermissions", "error");
+                    throw new moodle_exception("nopermissions", "error");
                 }
             }
             if ($state === self::COMPLETED || $state === self::NOSHOW) {
                 if ($slot->starttime > time()) {
-                    throw new \moodle_exception("notstarted", "officehours");
+                    throw new moodle_exception("notstarted", "officehours");
                 }
                 $booking->internalnotes = clean_param($internalnotes, PARAM_TEXT);
                 $booking->outcome = clean_param($outcome, PARAM_TEXT);
@@ -249,22 +253,22 @@ final class booking_service {
             $activity = $DB->get_record("officehours", ["id" => $booking->officehoursid], "*", MUST_EXIST);
             if (!$activity->allowreschedule || $booking->userid != $userid ||
                     !in_array($booking->state, [self::PENDING, self::CONFIRMED], true)) {
-                throw new \moodle_exception("rescheduleclosed", "officehours");
+                throw new moodle_exception("rescheduleclosed", "officehours");
             }
             if ($booking->slotid !== $old->slotid) {
-                throw new \moodle_exception("staleoperation", "officehours");
+                throw new moodle_exception("staleoperation", "officehours");
             }
             $oldslot = $DB->get_record("officehours_slot", ["id" => $booking->slotid], "*", MUST_EXIST);
             self::validate_window($activity, $oldslot, true);
             if ($newslotid === (int)$oldslot->id) {
-                throw new \moodle_exception("staleoperation", "officehours");
+                throw new moodle_exception("staleoperation", "officehours");
             }
             $target = $DB->get_record("officehours_slot", ["id" => $newslotid,
                 "officehoursid" => $booking->officehoursid], "*", MUST_EXIST);
             self::validate_window($activity, $target);
             self::unique($newslotid, $userid, $bookingid);
             if (!slot_service::open($newslotid)) {
-                throw new \moodle_exception("slotfull", "officehours");
+                throw new moodle_exception("slotfull", "officehours");
             }
             $booking->slotid = $newslotid;
             $booking->modified = time();

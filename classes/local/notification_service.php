@@ -26,6 +26,9 @@ namespace mod_officehours\local;
 
 use core\message\message;
 use core\lock\lock_config;
+use core_user;
+use moodle_url;
+use Throwable;
 
 /**
  * Notifications are first persisted, then delivered by cron.
@@ -116,7 +119,7 @@ final class notification_service {
                 $payload->component = "mod_officehours";
                 $payload->name = $record->waitlistid ? "offer" :
                     (str_starts_with($record->eventkey, "reminder:") ? "reminder" : "booking");
-                $payload->userfrom = \core_user::get_noreply_user();
+                $payload->userfrom = core_user::get_noreply_user();
                 $payload->userto = $person;
                 $payload->subject = get_string("notificationtitle", "officehours", $activity->name);
                 $payload->fullmessage = get_string("notificationbody", "officehours");
@@ -124,10 +127,10 @@ final class notification_service {
                 $payload->fullmessagehtml = "";
                 $payload->smallmessage = $payload->fullmessage;
                 $payload->notification = 1;
-                $payload->contexturl = (new \moodle_url("/mod/officehours/view.php", ["id" => $cm->id]))->out(false);
+                $payload->contexturl = (new moodle_url("/mod/officehours/view.php", ["id" => $cm->id]))->out(false);
                 $payload->contexturlname = $activity->name;
                 message_send($payload);
-            } catch (\Throwable $exception) {
+            } catch (Throwable $exception) {
                 // Do not automatically retry ambiguous send failures: a provider may already have delivered it.
                 debugging($exception->getMessage(), DEBUG_DEVELOPER);
             } finally {

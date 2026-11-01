@@ -22,8 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-// phpcs:ignore moodle.Files.MoodleInternal.MoodleInternalGlobalState -- Mandatory double-quoted guard.
-defined("MOODLE_INTERNAL") || die();
+use mod_officehours\local\calendar_service;
 
 /**
  * Restore officehours activity structure step for the Office Hours activity.
@@ -139,7 +138,7 @@ class restore_officehours_activity_structure_step extends restore_activity_struc
         $bookings = $DB->get_records("officehours_booking", ["officehoursid" => $this->get_new_parentid("officehours")]);
         foreach ($bookings as $booking) {
             if ($booking->state === "confirmed") {
-                \mod_officehours\local\calendar_service::sync((int)$booking->id);
+                calendar_service::sync((int)$booking->id);
             }
         }
     }

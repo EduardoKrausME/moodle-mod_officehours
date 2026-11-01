@@ -24,6 +24,8 @@
 
 namespace mod_officehours\local;
 
+use completion_info;
+
 /**
  * Derive completion from persisted confirmed and completed appointments.
  */
@@ -63,7 +65,7 @@ final class completion_service {
         if (!$cm || $cm->completion != COMPLETION_TRACKING_AUTOMATIC) {
             return;
         }
-        $info = new \completion_info(get_course($cm->course));
+        $info = new completion_info(get_course($cm->course));
         $info->update_state($cm, COMPLETION_UNKNOWN, $userid);
     }
 }

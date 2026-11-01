@@ -22,9 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-// PHPCS uses a literal single-quoted guard pattern; keep the required double-quoted form.
-// phpcs:ignore moodle.Files.MoodleInternal.MoodleInternalGlobalState
-defined("MOODLE_INTERNAL") || die();
+defined('MOODLE_INTERNAL') || die();
 
 $plugin->version = 2026103100;
 $plugin->release = "1.0.0";

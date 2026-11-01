@@ -24,14 +24,18 @@
 
 namespace mod_officehours\form;
 
-// phpcs:ignore moodle.Files.MoodleInternal.MoodleInternalGlobalState -- Mandatory double-quoted guard.
-defined("MOODLE_INTERNAL") || die();
+use core_date;
+use DateTimeZone;
+use moodleform;
+use Throwable;
+
+defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . "/formslib.php");
 
 /**
  * Native Moodle form for availability creation and editing.
  */
-final class availability_form extends \moodleform {
+final class availability_form extends moodleform {
     /**
      * definition in Office Hours.
      */
@@ -59,7 +63,7 @@ final class availability_form extends \moodleform {
         }
         $mform->addElement("text", "timezone", get_string("timezone", "officehours"));
         $mform->setType("timezone", PARAM_TEXT);
-        $mform->setDefault("timezone", \core_date::get_user_timezone());
+        $mform->setDefault("timezone", core_date::get_user_timezone());
         $mform->addElement("text", "capacity", get_string("capacity", "officehours"));
         $mform->setType("capacity", PARAM_INT);
         $mform->setDefault("capacity", 0);
@@ -78,8 +82,8 @@ final class availability_form extends \moodleform {
             $errors["enddate"] = get_string("invalidwindow", "officehours");
         }
         try {
-            new \DateTimeZone($data["timezone"]);
-        } catch (\Throwable $exception) {
+            new DateTimeZone($data["timezone"]);
+        } catch (Throwable $exception) {
             $errors["timezone"] = get_string("invalidtimezone", "officehours");
         }
         if ($data["capacity"] < 0) {

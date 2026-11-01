@@ -24,6 +24,9 @@
 
 namespace mod_officehours\local;
 
+use context_module;
+use moodle_exception;
+
 /**
  * Every promotion is protected by the slot lock held by its caller.
  */
@@ -36,22 +39,22 @@ final class waiting_list_service {
         $slot = $DB->get_record("officehours_slot", ["id" => $slotid], "*", MUST_EXIST);
         $cm = get_coursemodule_from_instance("officehours", $slot->officehoursid, 0, false, MUST_EXIST);
         access_manager::capability($cm, "book");
-        if (!is_enrolled(\context_module::instance($cm->id), $userid)) {
-            throw new \moodle_exception("notenrolled", "error");
+        if (!is_enrolled(context_module::instance($cm->id), $userid)) {
+            throw new moodle_exception("notenrolled", "error");
         }
         global $USER;
         if ($USER->id != $userid) {
-            throw new \moodle_exception("nopermissions", "error");
+            throw new moodle_exception("nopermissions", "error");
         }
         $activity = $DB->get_record("officehours", ["id" => $slot->officehoursid], "*", MUST_EXIST);
         if (!$activity->waitlistenabled || $slot->starttime <= time()) {
-            throw new \moodle_exception("waitlistclosed", "officehours");
+            throw new moodle_exception("waitlistclosed", "officehours");
         }
         $lock = slot_service::acquire($slotid);
         try {
             $transaction = $DB->start_delegated_transaction();
             if (slot_service::open($slotid)) {
-                throw new \moodle_exception("slotavailable", "officehours");
+                throw new moodle_exception("slotavailable", "officehours");
             }
             if ($DB->record_exists_select("officehours_booking",
                     "slotid = :slot AND userid = :student AND state IN ('pending', 'confirmed')",
@@ -59,7 +62,7 @@ final class waiting_list_service {
                     $DB->record_exists_select("officehours_waitlist",
                     "slotid = :slot2 AND userid = :student2 AND status IN ('waiting', 'offered')",
                     ["slot2" => $slotid, "student2" => $userid])) {
-                throw new \moodle_exception("duplicatebooking", "officehours");
+                throw new moodle_exception("duplicatebooking", "officehours");
             }
             $id = $DB->insert_record("officehours_waitlist", (object)[
                 "officehoursid" => $slot->officehoursid, "slotid" => $slotid, "userid" => $userid,

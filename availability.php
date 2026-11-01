@@ -22,31 +22,36 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use mod_officehours\form\availability_form;
+use mod_officehours\form\block_form;
+use mod_officehours\local\access_manager;
+use mod_officehours\local\availability_service;
+
 require_once("../../config.php");
 
 $id = required_param("id", PARAM_INT);
 $ruleid = optional_param("ruleid", 0, PARAM_INT);
 $action = optional_param("action", "edit", PARAM_ALPHA);
-[$cm, $course, $context, $activity] = \mod_officehours\local\access_manager::load($id);
+[$cm, $course, $context, $activity] = access_manager::load($id);
 require_login($course, true, $cm);
-\mod_officehours\local\access_manager::capability($cm, "createavailability");
+access_manager::capability($cm, "createavailability");
 $PAGE->set_url(new moodle_url("/mod/officehours/availability.php", ["id" => $id]));
 $PAGE->set_title(get_string("availability", "officehours"));
 $PAGE->set_context($context);
 $back = new moodle_url("/mod/officehours/availability.php", ["id" => $id]);
 if ($action === "delete") {
     require_sesskey();
-    \mod_officehours\local\availability_service::delete((int)$activity->id, (int)$USER->id, $ruleid);
+    availability_service::delete((int)$activity->id, (int)$USER->id, $ruleid);
     redirect($back, get_string("availabilitydeleted", "officehours"));
 }
 if ($action === "block") {
-    $form = new \mod_officehours\form\block_form(null);
+    $form = new block_form(null);
     $form->set_data(["id" => $id]);
     if ($form->is_cancelled()) {
         redirect($back);
     }
     if ($data = $form->get_data()) {
-        \mod_officehours\local\availability_service::block((int)$activity->id, (int)$USER->id,
+        availability_service::block((int)$activity->id, (int)$USER->id,
             (int)$data->starttime, (int)$data->endtime, $data->reason ?? "");
         redirect($back, get_string("blocksaved", "officehours"));
     }
@@ -55,7 +60,7 @@ if ($action === "block") {
     echo $OUTPUT->footer();
     exit;
 }
-$form = new \mod_officehours\form\availability_form(null);
+$form = new availability_form(null);
 $rule = null;
 if ($ruleid) {
     $rule = $DB->get_record("officehours_availability", ["id" => $ruleid,
@@ -67,7 +72,7 @@ if ($form->is_cancelled()) {
     redirect(new moodle_url("/mod/officehours/view.php", ["id" => $id]));
 }
 if ($data = $form->get_data()) {
-    \mod_officehours\local\availability_service::save((int)$activity->id, (int)$USER->id,
+    availability_service::save((int)$activity->id, (int)$USER->id,
         ["kind" => $data->kind, "weekday" => (int)$data->weekday,
             "startdate" => (int)$data->startdate, "enddate" => (int)$data->enddate,
             "startminute" => (int)$data->startminute, "endminute" => (int)$data->endminute,

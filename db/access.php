@@ -23,7 +23,7 @@
  */
 
 // phpcs:ignore moodle.Files.MoodleInternal.MoodleInternalGlobalState -- Mandatory double-quoted guard.
-defined("MOODLE_INTERNAL") || die();
+defined('MOODLE_INTERNAL') || die();
 
 $capabilities = [
     "mod/officehours:addinstance" => ["captype" => "write", "contextlevel" => CONTEXT_COURSE,
