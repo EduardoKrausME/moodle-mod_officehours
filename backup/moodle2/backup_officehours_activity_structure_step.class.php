@@ -22,9 +22,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-// phpcs:ignore moodle.Files.MoodleInternal.MoodleInternalGlobalState -- Mandatory double-quoted guard.
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Backup officehours activity structure step for the Office Hours activity.
  */
