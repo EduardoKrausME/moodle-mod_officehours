@@ -14,110 +14,58 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Configuration form for office hours.
- *
- * @package    mod_officehours
- * @copyright  2026 Eduardo Kraus {@link https://eduardokraus.com}
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
+/** @package mod_officehours */
 defined('MOODLE_INTERNAL') || die();
-require_once($CFG->dirroot . "/course/moodleform_mod.php");
+require_once($CFG->dirroot . '/course/moodleform_mod.php');
 
-/**
- * Mod officehours mod form for the Office Hours activity.
- */
+/** Configure private learning-support consultations, not bookable times. */
 class mod_officehours_mod_form extends moodleform_mod {
-    /**
-     * Definition for the Office Hours activity.
-     */
     public function definition(): void {
-        $mform = $this->_form;
-        $mform->addElement("header", "general", get_string("general"));
-        $mform->addElement("text", "name", get_string("name"), ["size" => 64]);
-        $mform->setType("name", PARAM_TEXT);
-        $mform->addRule("name", null, "required", null, "client");
+        $form = $this->_form;
+        $form->addElement('header', 'general', get_string('general'));
+        $form->addElement('text', 'name', get_string('name'), ['size' => 64]);
+        $form->setType('name', PARAM_TEXT);
+        $form->addRule('name', null, 'required', null, 'client');
         $this->standard_intro_elements();
-        $mform->addElement("select", "modality", get_string("modality", "officehours"), [
-            "online" => get_string("online", "officehours"),
-            "onsite" => get_string("onsite", "officehours"),
-            "hybrid" => get_string("hybrid", "officehours"),
-        ]);
-        foreach (["slotduration" => 30, "capacity" => 1, "bufferminutes" => 0,
-                "minnotice" => 60, "maxnotice" => 43200, "cancelnotice" => 60,
-                "maxbookings" => 3, "offerexpires" => 120, "reminderminutes" => 60] as $name => $default) {
-            $mform->addElement("text", $name, get_string($name, "officehours"), ["size" => 8]);
-            $mform->setType($name, PARAM_INT);
-            $mform->setDefault($name, $default);
-        }
-        foreach (["allowreschedule", "waitlistenabled", "approvalrequired", "showbusy", "allowsubject"] as $name) {
-            $mform->addElement("advcheckbox", $name, get_string($name, "officehours"));
-            $mform->setDefault($name,
-                ($name === "allowreschedule" || $name === "waitlistenabled" || $name === "allowsubject") ? 1 : 0);
-        }
-        $mform->addElement("textarea", "additionalinfo", get_string("additionalinfo", "officehours"));
-        $mform->setType("additionalinfo", PARAM_TEXT);
-        $mform->addElement("text", "location", get_string("location", "officehours"));
-        $mform->setType("location", PARAM_TEXT);
-        $mform->addElement("text", "meetingurl", get_string("meetingurl", "officehours"));
-        $mform->setType("meetingurl", PARAM_URL);
-        $mform->addElement("date_time_selector", "timeopen", get_string("timeopen", "officehours"), ["optional" => true]);
-        $mform->addElement("date_time_selector", "timeclose", get_string("timeclose", "officehours"), ["optional" => true]);
+        $form->addElement('text', 'responsehours', get_string('responsehours', 'officehours'), ['size' => 6]);
+        $form->setType('responsehours', PARAM_INT);
+        $form->setDefault('responsehours', 48);
+        $form->addElement('date_time_selector', 'timeopen', get_string('timeopen', 'officehours'),
+            ['optional' => true]);
+        $form->addElement('date_time_selector', 'timeclose', get_string('timeclose', 'officehours'),
+            ['optional' => true]);
         $this->standard_coursemodule_elements();
         $this->add_action_buttons();
     }
 
-    /**
-     * Add completion rules for the Office Hours activity.
-     */
     public function add_completion_rules(): array {
-        $mform = $this->_form;
-        foreach (["completionbooked", "completionattended"] as $field) {
-            $name = $field;
-            $mform->addElement("advcheckbox", $name, get_string($field, "officehours"));
+        $form = $this->_form;
+        foreach (['completionrequested', 'completionresolved'] as $name) {
+            $form->addElement('advcheckbox', $name, get_string($name, 'officehours'));
         }
-        $count = "completioncount";
-        $mform->addElement("text", $count, get_string("completiontarget", "officehours"), ["size" => 5]);
-        $mform->setType($count, PARAM_INT);
-        $mform->setDefault($count, 0);
-        return ["completionbooked",
-            "completionattended", $count];
+        $form->addElement('text', 'completiontarget', get_string('completiontarget', 'officehours'),
+            ['size' => 5]);
+        $form->setType('completiontarget', PARAM_INT);
+        $form->setDefault('completiontarget', 0);
+        return ['completionrequested', 'completionresolved', 'completiontarget'];
     }
 
-    /**
-     * Completion rule enabled for the Office Hours activity.
-     */
     public function completion_rule_enabled($data): bool {
-        return !empty($data["completionbooked"]) ||
-            !empty($data["completionattended"]) ||
-            !empty($data["completioncount"]);
+        return !empty($data['completionrequested']) || !empty($data['completionresolved']) ||
+            !empty($data['completiontarget']);
     }
 
-    /**
-     * Validation for the Office Hours activity.
-     */
     public function validation($data, $files): array {
         $errors = parent::validation($data, $files);
-        foreach (["slotduration", "capacity", "maxbookings", "offerexpires"] as $field) {
-            if ((int)$data[$field] < 1) {
-                $errors[$field] = get_string("positiveinteger", "officehours");
-            }
+        if ((int)$data['responsehours'] < 1) {
+            $errors['responsehours'] = get_string('positiveinteger', 'officehours');
         }
-        foreach (["minnotice", "maxnotice", "cancelnotice", "bufferminutes", "reminderminutes"] as $field) {
-            if ((int)$data[$field] < 0) {
-                $errors[$field] = get_string("nonnegative", "officehours");
-            }
+        if (isset($data['completiontarget']) && (int)$data['completiontarget'] < 0) {
+            $errors['completiontarget'] = get_string('nonnegative', 'officehours');
         }
-        $count = "completioncount";
-        if (isset($data[$count]) && (int)$data[$count] < 0) {
-            $errors[$count] = get_string("nonnegative", "officehours");
-        }
-        if ((int)$data["minnotice"] > (int)$data["maxnotice"]) {
-            $errors["maxnotice"] = get_string("invalidwindow", "officehours");
-        }
-        if (!empty($data["timeopen"]) && !empty($data["timeclose"]) && $data["timeclose"] <= $data["timeopen"]) {
-            $errors["timeclose"] = get_string("invalidwindow", "officehours");
+        if (!empty($data['timeopen']) && !empty($data['timeclose']) &&
+                $data['timeopen'] >= $data['timeclose']) {
+            $errors['timeclose'] = get_string('invalidwindow', 'officehours');
         }
         return $errors;
     }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/officehours/db" VERSION="20261015" COMMENT="Office hours activity tables" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
+<XMLDB PATH="mod/officehours/db" VERSION="20261114" COMMENT="Office hours activity tables" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
   <TABLES>
     <TABLE NAME="officehours" COMMENT="officehours records">
       <FIELDS>
@@ -31,6 +31,10 @@
         <FIELD NAME="completionbooked" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
         <FIELD NAME="completionattended" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
         <FIELD NAME="completioncount" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="responsehours" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="48"/>
+        <FIELD NAME="completionrequested" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="completionresolved" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="completiontarget" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
       </FIELDS>
@@ -181,6 +185,64 @@
       </KEYS>
       <INDEXES>
         <INDEX NAME="private_event" UNIQUE="true" FIELDS="bookingid, userid"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="officehours_request" COMMENT="Private academic support requests">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="officehoursid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="teacherid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="subject" TYPE="char" LENGTH="255" NOTNULL="true"/>
+        <FIELD NAME="description" TYPE="text" NOTNULL="true"/>
+        <FIELD NAME="state" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="open"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="timeclosed" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="officehours_fk" TYPE="foreign" FIELDS="officehoursid" REFTABLE="officehours" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="courseuser_ix" UNIQUE="false" FIELDS="officehoursid, userid"/>
+        <INDEX NAME="state_ix" UNIQUE="false" FIELDS="officehoursid, state"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="officehours_message" COMMENT="Private responses and staff notes">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="officehoursid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="requestid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="body" TYPE="text" NOTNULL="true"/>
+        <FIELD NAME="internal" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="officehours_fk" TYPE="foreign" FIELDS="officehoursid" REFTABLE="officehours" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="request_ix" UNIQUE="false" FIELDS="requestid, timecreated"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="officehours_history" COMMENT="Audited learning support state changes">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="officehoursid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="requestid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="oldstate" TYPE="char" LENGTH="20" NOTNULL="true"/>
+        <FIELD NAME="newstate" TYPE="char" LENGTH="20" NOTNULL="true"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="officehours_fk" TYPE="foreign" FIELDS="officehoursid" REFTABLE="officehours" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="request_ix" UNIQUE="false" FIELDS="requestid, timecreated"/>
       </INDEXES>
     </TABLE>
   </TABLES>

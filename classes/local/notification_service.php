@@ -50,6 +50,35 @@ final class notification_service {
     }
 
     /**
+     * Queue an update to the requester and authorized consultation teachers.
+     */
+    public static function queue_request(int $requestid, string $event): void {
+        global $DB, $USER;
+        $request = $DB->get_record('officehours_request', ['id' => $requestid], '*', MUST_EXIST);
+        $cm = get_coursemodule_from_instance('officehours', $request->officehoursid, 0, false, MUST_EXIST);
+        $context = \context_module::instance($cm->id);
+        $recipients = [(int)$request->userid];
+        if ($request->teacherid) {
+            $recipients[] = (int)$request->teacherid;
+        } else {
+            $teachers = get_users_by_capability($context, 'mod/officehours:managerequests',
+                'u.id', '', '', '', '', '', false);
+            foreach ($teachers as $teacher) {
+                if (access_manager::visible_student($cm, (int)$request->userid, (int)$teacher->id)) {
+                    $recipients[] = (int)$teacher->id;
+                }
+            }
+        }
+        foreach (array_unique($recipients) as $recipient) {
+            if ($recipient === (int)$USER->id) {
+                continue;
+            }
+            self::queue((int)$request->officehoursid, 0, 0, $recipient,
+                'request:' . $requestid . ':' . $event . ':' . $request->timemodified . ':' . $recipient);
+        }
+    }
+
+    /**
      * queue booking in Office Hours.
      */
     public static function queue_booking(int $bookingid, string $action): void {
@@ -117,8 +146,9 @@ final class notification_service {
                 $cm = get_coursemodule_from_instance("officehours", $activity->id);
                 $payload = new message();
                 $payload->component = "mod_officehours";
-                $payload->name = $record->waitlistid ? "offer" :
-                    (str_starts_with($record->eventkey, "reminder:") ? "reminder" : "booking");
+                $payload->name = str_starts_with($record->eventkey, 'request:') ? 'request' :
+                    ($record->waitlistid ? 'offer' :
+                    (str_starts_with($record->eventkey, 'reminder:') ? 'reminder' : 'booking'));
                 $payload->userfrom = core_user::get_noreply_user();
                 $payload->userto = $person;
                 $payload->subject = get_string("notificationtitle", "officehours", $activity->name);

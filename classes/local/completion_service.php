@@ -14,54 +14,36 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Completion API integration.
- *
- * @package    mod_officehours
- * @copyright  2026 Eduardo Kraus {@link https://eduardokraus.com}
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
+/** @package mod_officehours */
 namespace mod_officehours\local;
 
 use completion_info;
 
-/**
- * Derive completion from persisted confirmed and completed appointments.
- */
+/** Completion for private learning-support requests rather than attendance. */
 final class completion_service {
-    /**
-     * complete in Office Hours.
-     */
     public static function complete(int $officehoursid, int $userid, bool $type = false): bool {
         global $DB;
-        $activity = $DB->get_record("officehours", ["id" => $officehoursid], "*", MUST_EXIST);
-        $counts = $DB->get_records_sql("SELECT state, COUNT(id) AS total FROM {officehours_booking}
-            WHERE officehoursid = :oid AND userid = :uid GROUP BY state",
-            ["oid" => $officehoursid, "uid" => $userid]);
-        $confirmed = (int)($counts[booking_service::CONFIRMED]->total ?? 0);
-        $completed = (int)($counts[booking_service::COMPLETED]->total ?? 0);
+        $activity = $DB->get_record('officehours', ['id' => $officehoursid], '*', MUST_EXIST);
+        $created = $DB->count_records('officehours_request',
+            ['officehoursid' => $officehoursid, 'userid' => $userid]);
+        $resolved = $DB->count_records_select('officehours_request',
+            "officehoursid = :oid AND userid = :uid AND state IN ('resolved', 'closed')",
+            ['oid' => $officehoursid, 'uid' => $userid]);
         $checks = [];
-        if ($activity->completionbooked) {
-            $checks[] = ($confirmed + $completed) >= 1;
+        if ($activity->completionrequested) {
+            $checks[] = $created > 0;
         }
-        if ($activity->completionattended) {
-            $checks[] = $completed >= 1;
+        if ($activity->completionresolved) {
+            $checks[] = $resolved > 0;
         }
-        if ($activity->completioncount) {
-            $checks[] = $completed >= $activity->completioncount;
+        if ($activity->completiontarget) {
+            $checks[] = $resolved >= (int)$activity->completiontarget;
         }
-        if (!$checks) {
-            return $type;
-        }
-        return !in_array(false, $checks, true);
+        return $checks ? !in_array(false, $checks, true) : $type;
     }
 
-    /**
-     * update in Office Hours.
-     */
     public static function update(int $officehoursid, int $userid): void {
-        $cm = get_coursemodule_from_instance("officehours", $officehoursid);
+        $cm = get_coursemodule_from_instance('officehours', $officehoursid);
         if (!$cm || $cm->completion != COMPLETION_TRACKING_AUTOMATIC) {
             return;
         }

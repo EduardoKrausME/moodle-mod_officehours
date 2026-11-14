@@ -14,37 +14,19 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Scheduled waiting list, reminder, and notification work.
- *
- * @package    mod_officehours
- * @copyright  2026 Eduardo Kraus {@link https://eduardokraus.com}
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
+/** @package mod_officehours */
 namespace mod_officehours\task;
 
 use core\task\scheduled_task;
 use mod_officehours\local\notification_service;
-use mod_officehours\local\waiting_list_service;
 
-/**
- * Reconcile time-based tasks without duplicated offers.
- */
+/** Deliver private guidance notifications. Legacy booking reminders are disabled. */
 final class maintenance extends scheduled_task {
-    /**
-     * get name in Office Hours.
-     */
     public function get_name(): string {
-        return get_string("maintenancetask", "officehours");
+        return get_string('maintenancetask', 'officehours');
     }
 
-    /**
-     * execute in Office Hours.
-     */
     public function execute(): void {
-        waiting_list_service::expire_and_promote();
-        notification_service::queue_reminders();
         notification_service::flush();
     }
 }

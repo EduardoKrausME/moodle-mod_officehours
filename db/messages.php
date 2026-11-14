@@ -25,6 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $messageproviders = [
+    "request" => ["capability" => "mod/officehours:view"],
     "booking" => ["capability" => "mod/officehours:view"],
     "offer" => ["capability" => "mod/officehours:view"],
     "reminder" => ["capability" => "mod/officehours:view"],
