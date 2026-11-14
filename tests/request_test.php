@@ -14,7 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/** @package mod_officehours */
+/**
+ * Test private academic support requests and permissions.
+ *
+ * @package    mod_officehours
+ * @copyright  2026 Eduardo Kraus {@link https://eduardokraus.com}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 namespace mod_officehours;
 
 use advanced_testcase;
@@ -22,9 +28,14 @@ use mod_officehours\local\request_service;
 use moodle_exception;
 use required_capability_exception;
 
-/** Server-side private support access and lifecycle tests. */
+/**
+ * Server-side private support access and lifecycle tests.
+ */
 final class request_test extends advanced_testcase {
-    /** @covers \mod_officehours\local\request_service::get
+    /**
+     * Verify the relevant academic guidance behavior.
+     *
+     * @covers \mod_officehours\local\request_service::get
      * @covers \mod_officehours\local\request_service::reply
      */
     public function test_private_access_and_staff_only_notes(): void {
@@ -46,7 +57,11 @@ final class request_test extends advanced_testcase {
         request_service::get((int)$activity->id, $id);
     }
 
-    /** @covers \mod_officehours\local\request_service::messages */
+    /**
+     * Verify the related academic guidance behavior.
+     *
+     * @covers \mod_officehours\local\request_service::messages
+     */
     public function test_notes_are_hidden_from_students(): void {
         global $DB;
         $this->resetAfterTest();

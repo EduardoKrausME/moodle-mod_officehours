@@ -14,7 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/** @package mod_officehours */
+/**
+ * Define the learner's private guidance request form.
+ *
+ * @package    mod_officehours
+ * @copyright  2026 Eduardo Kraus {@link https://eduardokraus.com}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 namespace mod_officehours\form;
 
 use moodleform;
@@ -22,8 +28,13 @@ use moodleform;
 defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/formslib.php');
 
-/** Private learning-support request. */
+/**
+ * Private learning-support request.
+ */
 final class request_form extends moodleform {
+    /**
+     * Define the fields and buttons for this Moodle form.
+     */
     public function definition(): void {
         $form = $this->_form;
         $form->addElement('hidden', 'id');

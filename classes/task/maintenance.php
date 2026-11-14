@@ -14,18 +14,32 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/** @package mod_officehours */
+/**
+ * Deliver private academic guidance notifications.
+ *
+ * @package    mod_officehours
+ * @copyright  2026 Eduardo Kraus {@link https://eduardokraus.com}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 namespace mod_officehours\task;
 
 use core\task\scheduled_task;
 use mod_officehours\local\notification_service;
 
-/** Deliver private guidance notifications. Legacy booking reminders are disabled. */
+/**
+ * Deliver private guidance notifications. Legacy booking reminders are disabled.
+ */
 final class maintenance extends scheduled_task {
+    /**
+     * Return the label for the scheduled task.
+     */
     public function get_name(): string {
         return get_string('maintenancetask', 'officehours');
     }
 
+    /**
+     * Flush the pending academic guidance notifications.
+     */
     public function execute(): void {
         notification_service::flush();
     }

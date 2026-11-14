@@ -14,18 +14,32 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/** @package mod_officehours */
+/**
+ * Expose academic guidance completion rules.
+ *
+ * @package    mod_officehours
+ * @copyright  2026 Eduardo Kraus {@link https://eduardokraus.com}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 namespace mod_officehours\completion;
 
 use coding_exception;
 use core_completion\activity_custom_completion;
 
-/** Custom completion based on consultations submitted and resolved. */
+/**
+ * Custom completion based on consultations submitted and resolved.
+ */
 final class custom_completion extends activity_custom_completion {
+    /**
+     * List all available custom completion rules.
+     */
     public static function get_defined_custom_rules(): array {
         return ['completionrequested', 'completionresolved', 'completiontarget'];
     }
 
+    /**
+     * Provide the descriptions of custom completion rules.
+     */
     public function get_custom_rule_descriptions(): array {
         global $DB;
         $activity = $DB->get_record('officehours', ['id' => $this->cm->instance], '*', MUST_EXIST);
@@ -36,6 +50,9 @@ final class custom_completion extends activity_custom_completion {
         ];
     }
 
+    /**
+     * Evaluate the current state of one completion rule.
+     */
     public function get_state(string $rule): int {
         global $DB;
         if (!in_array($rule, self::get_defined_custom_rules(), true)) {
@@ -55,6 +72,9 @@ final class custom_completion extends activity_custom_completion {
         return $passed ? COMPLETION_COMPLETE : COMPLETION_INCOMPLETE;
     }
 
+    /**
+     * Return the display order of completion rules.
+     */
     public function get_sort_order(): array {
         return self::get_defined_custom_rules();
     }

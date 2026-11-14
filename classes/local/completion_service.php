@@ -14,13 +14,24 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/** @package mod_officehours */
+/**
+ * Track activity completion based on guidance requests.
+ *
+ * @package    mod_officehours
+ * @copyright  2026 Eduardo Kraus {@link https://eduardokraus.com}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 namespace mod_officehours\local;
 
 use completion_info;
 
-/** Completion for private learning-support requests rather than attendance. */
+/**
+ * Completion for private learning-support requests rather than attendance.
+ */
 final class completion_service {
+    /**
+     * Determine whether a learner has satisfied configured completion conditions.
+     */
     public static function complete(int $officehoursid, int $userid, bool $type = false): bool {
         global $DB;
         $activity = $DB->get_record('officehours', ['id' => $officehoursid], '*', MUST_EXIST);
@@ -42,6 +53,9 @@ final class completion_service {
         return $checks ? !in_array(false, $checks, true) : $type;
     }
 
+    /**
+     * Refresh the completion status for a learner.
+     */
     public static function update(int $officehoursid, int $userid): void {
         $cm = get_coursemodule_from_instance('officehours', $officehoursid);
         if (!$cm || $cm->completion != COMPLETION_TRACKING_AUTOMATIC) {

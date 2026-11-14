@@ -27,8 +27,13 @@ namespace mod_officehours\local;
 use calendar_event;
 use Throwable;
 
-/** Remove historical user calendar events created by previous plugin versions. */
+/**
+ * Remove historical user calendar events created by previous plugin versions.
+ */
 final class calendar_service {
+    /**
+     * Remove historical appointment calendar events.
+     */
     public static function remove(int $bookingid): void {
         global $DB;
         foreach ($DB->get_records("officehours_calendar", ["bookingid" => $bookingid]) as $row) {

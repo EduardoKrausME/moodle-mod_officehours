@@ -14,16 +14,28 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/** @package mod_officehours */
+/**
+ * Test academic guidance activity completion.
+ *
+ * @package    mod_officehours
+ * @copyright  2026 Eduardo Kraus {@link https://eduardokraus.com}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 namespace mod_officehours;
 
 use advanced_testcase;
 use mod_officehours\local\completion_service;
 use mod_officehours\local\request_service;
 
-/** Completion from private guidance cases, not bookings. */
+/**
+ * Completion from private guidance cases, not bookings.
+ */
 final class completion_test extends advanced_testcase {
-    /** @covers \mod_officehours\local\completion_service::complete */
+    /**
+     * Verify the related academic guidance behavior.
+     *
+     * @covers \mod_officehours\local\completion_service::complete
+     */
     public function test_completion_from_guidance_requests(): void {
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course();

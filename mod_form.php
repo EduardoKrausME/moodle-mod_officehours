@@ -14,12 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/** @package mod_officehours */
+/**
+ * Configure the academic guidance activity.
+ *
+ * @package    mod_officehours
+ * @copyright  2026 Eduardo Kraus {@link https://eduardokraus.com}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot . '/course/moodleform_mod.php');
 
-/** Configure private learning-support consultations, not bookable times. */
+/**
+ * Configure private learning-support consultations, not bookable times.
+ */
 class mod_officehours_mod_form extends moodleform_mod {
+    /**
+     * Define the fields and buttons for this Moodle form.
+     */
     public function definition(): void {
         $form = $this->_form;
         $form->addElement('header', 'general', get_string('general'));
@@ -38,6 +49,9 @@ class mod_officehours_mod_form extends moodleform_mod {
         $this->add_action_buttons();
     }
 
+    /**
+     * Add the configurable automatic completion criteria.
+     */
     public function add_completion_rules(): array {
         $form = $this->_form;
         foreach (['completionrequested', 'completionresolved'] as $name) {
@@ -50,11 +64,17 @@ class mod_officehours_mod_form extends moodleform_mod {
         return ['completionrequested', 'completionresolved', 'completiontarget'];
     }
 
+    /**
+     * Determine whether completion rules are enabled.
+     */
     public function completion_rule_enabled($data): bool {
         return !empty($data['completionrequested']) || !empty($data['completionresolved']) ||
             !empty($data['completiontarget']);
     }
 
+    /**
+     * Validate the activity configuration.
+     */
     public function validation($data, $files): array {
         $errors = parent::validation($data, $files);
         if ((int)$data['responsehours'] < 1) {
