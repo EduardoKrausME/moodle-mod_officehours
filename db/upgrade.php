@@ -14,8 +14,22 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/** @package mod_officehours */
-/** Upgrade to private academic guidance workflow, retaining previous records as archives. */
+/**
+ * Upgrade Office Hours activity structures.
+ *
+ * @package    mod_officehours
+ * @copyright  2026 Eduardo Kraus {@link https://eduardokraus.com}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+/**
+ * Retain previous appointments while adding academic guidance records.
+ */
+/**
+ * Perform the Moodle module database upgrade.
+ *
+ * @param int $oldversion Installed plugin version.
+ * @return bool
+ */
 function xmldb_officehours_upgrade(int $oldversion): bool {
     global $DB;
     $dbman = $DB->get_manager();

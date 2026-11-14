@@ -239,7 +239,8 @@ final class provider implements
         foreach ($rows as $record) {
             calendar_service::remove((int)$record->id);
         }
-        foreach (["message", "history", "request", "calendar", "notification", "waitlist", "booking", "exception", "slot", "availability"] as $table) {
+        foreach (["message", "history", "request", "calendar", "notification",
+                "waitlist", "booking", "exception", "slot", "availability"] as $table) {
             $DB->delete_records("officehours_" . $table, ["officehoursid" => $cm->instance]);
         }
     }

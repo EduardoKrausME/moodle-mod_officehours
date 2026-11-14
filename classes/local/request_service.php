@@ -15,9 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Private pedagogical consultation requests (not appointment reservations).
+ * Manage private pedagogical consultation requests.
  *
- * @package mod_officehours
+ * @package    mod_officehours
+ * @copyright  2026 Eduardo Kraus {@link https://eduardokraus.com}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace mod_officehours\local;
 
@@ -25,15 +27,25 @@ use context_module;
 use moodle_exception;
 use stdClass;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Request workflow; all entry points verify the current actor and activity.
  */
 final class request_service {
+    /**
+     * The open state of a consultation request.
+     */
     public const OPEN = 'open';
+    /**
+     * The inprogress state of a consultation request.
+     */
     public const INPROGRESS = 'inprogress';
+    /**
+     * The resolved state of a consultation request.
+     */
     public const RESOLVED = 'resolved';
+    /**
+     * The closed state of a consultation request.
+     */
     public const CLOSED = 'closed';
 
     /**
@@ -145,49 +157,49 @@ final class request_service {
             throw new moodle_exception('lockfailed', 'officehours');
         }
         try {
-        $request = self::get($officehoursid, $requestid);
-        $cm = get_coursemodule_from_instance('officehours', $officehoursid, 0, false, MUST_EXIST);
-        $staff = has_capability('mod/officehours:managerequests', context_module::instance($cm->id));
-        $allowed = [
-            self::OPEN => [self::INPROGRESS, self::RESOLVED],
-            self::INPROGRESS => [self::RESOLVED],
-            self::RESOLVED => [self::CLOSED, self::OPEN],
-            self::CLOSED => [self::OPEN],
-        ];
-        if (!in_array($next, $allowed[$request->state] ?? [], true)) {
-            throw new moodle_exception('invalidrequesttransition', 'officehours');
-        }
-        if ($next === self::INPROGRESS || $next === self::RESOLVED) {
-            if (!$staff) {
+            $request = self::get($officehoursid, $requestid);
+            $cm = get_coursemodule_from_instance('officehours', $officehoursid, 0, false, MUST_EXIST);
+            $staff = has_capability('mod/officehours:managerequests', context_module::instance($cm->id));
+            $allowed = [
+                self::OPEN => [self::INPROGRESS, self::RESOLVED],
+                self::INPROGRESS => [self::RESOLVED],
+                self::RESOLVED => [self::CLOSED, self::OPEN],
+                self::CLOSED => [self::OPEN],
+            ];
+            if (!in_array($next, $allowed[$request->state] ?? [], true)) {
+                throw new moodle_exception('invalidrequesttransition', 'officehours');
+            }
+            if ($next === self::INPROGRESS || $next === self::RESOLVED) {
+                if (!$staff) {
+                    throw new moodle_exception('nopermissions', 'error');
+                }
+            } else if ($next === self::CLOSED) {
+                if ((int)$request->userid !== (int)$USER->id && !$staff) {
+                    throw new moodle_exception('nopermissions', 'error');
+                }
+            } else if ((int)$request->userid !== (int)$USER->id && !$staff) {
                 throw new moodle_exception('nopermissions', 'error');
             }
-        } else if ($next === self::CLOSED) {
-            if ((int)$request->userid !== (int)$USER->id && !$staff) {
-                throw new moodle_exception('nopermissions', 'error');
+            $now = time();
+            $transaction = $DB->start_delegated_transaction();
+            // The named Moodle lock serializes state changes for this request.
+            $count = $DB->count_records('officehours_request',
+                ['id' => $requestid, 'officehoursid' => $officehoursid, 'state' => $request->state]);
+            if (!$count) {
+                throw new moodle_exception('staleoperation', 'officehours');
             }
-        } else if ((int)$request->userid !== (int)$USER->id && !$staff) {
-            throw new moodle_exception('nopermissions', 'error');
-        }
-        $now = time();
-        $transaction = $DB->start_delegated_transaction();
-        // The named Moodle lock serializes state changes for this request.
-        $count = $DB->count_records('officehours_request',
-            ['id' => $requestid, 'officehoursid' => $officehoursid, 'state' => $request->state]);
-        if (!$count) {
-            throw new moodle_exception('staleoperation', 'officehours');
-        }
-        $DB->set_field('officehours_request', 'state', $next, ['id' => $requestid, 'state' => $request->state]);
-        $DB->set_field('officehours_request', 'timemodified', $now, ['id' => $requestid]);
-        $DB->set_field('officehours_request', 'timeclosed', $next === self::CLOSED ? $now : 0,
-            ['id' => $requestid]);
-        $historyid = $DB->insert_record('officehours_history', (object)[
-            'officehoursid' => $officehoursid, 'requestid' => $requestid,
-            'userid' => (int)$USER->id, 'oldstate' => $request->state,
-            'newstate' => $next, 'timecreated' => $now,
-        ]);
-        $transaction->allow_commit();
-        completion_service::update($officehoursid, (int)$request->userid);
-        notification_service::queue_request($requestid, 'state:' . $historyid);
+            $DB->set_field('officehours_request', 'state', $next, ['id' => $requestid, 'state' => $request->state]);
+            $DB->set_field('officehours_request', 'timemodified', $now, ['id' => $requestid]);
+            $DB->set_field('officehours_request', 'timeclosed', $next === self::CLOSED ? $now : 0,
+                ['id' => $requestid]);
+            $historyid = $DB->insert_record('officehours_history', (object)[
+                'officehoursid' => $officehoursid, 'requestid' => $requestid,
+                'userid' => (int)$USER->id, 'oldstate' => $request->state,
+                'newstate' => $next, 'timecreated' => $now,
+            ]);
+            $transaction->allow_commit();
+            completion_service::update($officehoursid, (int)$request->userid);
+            notification_service::queue_request($requestid, 'state:' . $historyid);
         } finally {
             $lock->release();
         }

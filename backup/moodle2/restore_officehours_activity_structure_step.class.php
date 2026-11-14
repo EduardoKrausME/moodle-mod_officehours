@@ -135,7 +135,9 @@ class restore_officehours_activity_structure_step extends restore_activity_struc
         }
     }
 
-    /** Restore the private learning-support request. */
+    /**
+     * Restore the private learning-support request.
+     */
     protected function process_officehours_request($data): void {
         global $DB;
         $data = (object)$data;
@@ -152,7 +154,9 @@ class restore_officehours_activity_structure_step extends restore_activity_struc
         $this->set_mapping('officehours_request', $oldid, $newid);
     }
 
-    /** Restore private messages only when the user was mapped. */
+    /**
+     * Restore private messages only when the user was mapped.
+     */
     protected function process_officehours_message($data): void {
         global $DB;
         $data = (object)$data;
@@ -165,7 +169,9 @@ class restore_officehours_activity_structure_step extends restore_activity_struc
         }
     }
 
-    /** Restore audited state changes with remapped authors. */
+    /**
+     * Restore audited state changes with remapped authors.
+     */
     protected function process_officehours_history($data): void {
         global $DB;
         $data = (object)$data;

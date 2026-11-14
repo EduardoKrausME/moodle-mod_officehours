@@ -36,7 +36,8 @@ class backup_officehours_activity_structure_step extends backup_activity_structu
             "cancelnotice", "maxbookings", "allowreschedule", "waitlistenabled", "approvalrequired",
             "showbusy", "allowsubject", "additionalinfo", "location", "meetingurl", "timeopen",
             "timeclose", "offerexpires", "reminderminutes", "completionbooked", "completionattended",
-            "completioncount", "responsehours", "completionrequested", "completionresolved", "completiontarget", "timecreated", "timemodified"]);
+            "completioncount", "responsehours", "completionrequested", "completionresolved",
+            "completiontarget", "timecreated", "timemodified"]);
         $availabilities = new backup_nested_element("availabilities");
         $availability = new backup_nested_element("availability", ["id"], ["teacherid", "kind", "weekday",
             "startdate", "enddate", "startminute", "endminute", "timezone", "capacity", "enabled",
