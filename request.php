@@ -14,7 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/** @package mod_officehours */
+/**
+ * Display a private conversation for academic guidance.
+ *
+ * @package    mod_officehours
+ * @copyright  2026 Eduardo Kraus {@link https://eduardokraus.com}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 use mod_officehours\form\reply_form;
 use mod_officehours\local\access_manager;
 use mod_officehours\local\request_service;
@@ -23,6 +29,7 @@ require_once('../../config.php');
 $id = required_param('id', PARAM_INT);
 $requestid = required_param('requestid', PARAM_INT);
 [$cm, $course, $context, $activity] = access_manager::load($id);
+require_login($course, true, $cm);
 $request = request_service::get((int)$activity->id, $requestid);
 $staff = has_capability('mod/officehours:managerequests', $context);
 $PAGE->set_url(new moodle_url('/mod/officehours/request.php', ['id' => $id, 'requestid' => $requestid]));

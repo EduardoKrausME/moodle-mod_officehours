@@ -14,12 +14,19 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/** @package mod_officehours */
+/**
+ * Display the learning support activity to course participants.
+ *
+ * @package    mod_officehours
+ * @copyright  2026 Eduardo Kraus {@link https://eduardokraus.com}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 use mod_officehours\local\access_manager;
 
 require_once('../../config.php');
 $id = required_param('id', PARAM_INT);
 [$cm, $course, $context, $activity] = access_manager::load($id);
+require_login($course, true, $cm);
 $PAGE->set_url(new moodle_url('/mod/officehours/view.php', ['id' => $id]));
 $PAGE->set_context($context);
 $PAGE->set_title(format_string($activity->name));

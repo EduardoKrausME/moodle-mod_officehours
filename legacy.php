@@ -15,15 +15,18 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Read-only access to appointment records from earlier plugin versions.
+ * Display the read-only record of historical appointments.
  *
- * @package mod_officehours
+ * @package    mod_officehours
+ * @copyright  2026 Eduardo Kraus {@link https://eduardokraus.com}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 use mod_officehours\local\access_manager;
 require_once('../../config.php');
 
 $id = required_param('id', PARAM_INT);
 [$cm, $course, $context, $activity] = access_manager::load($id);
+require_login($course, true, $cm);
 $staff = has_capability('mod/officehours:managerequests', $context);
 $page = max(0, optional_param('page', 0, PARAM_INT));
 $pagesize = 50;

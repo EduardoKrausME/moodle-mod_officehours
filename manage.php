@@ -14,12 +14,19 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/** @package mod_officehours */
+/**
+ * Display teachers' consultation management dashboard.
+ *
+ * @package    mod_officehours
+ * @copyright  2026 Eduardo Kraus {@link https://eduardokraus.com}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 use mod_officehours\local\access_manager;
 
 require_once('../../config.php');
 $id = required_param('id', PARAM_INT);
 [$cm, $course, $context, $activity] = access_manager::load($id);
+require_login($course, true, $cm);
 access_manager::capability($cm, 'managerequests');
 $PAGE->set_url(new moodle_url('/mod/officehours/manage.php', ['id' => $id]));
 $PAGE->set_context($context);

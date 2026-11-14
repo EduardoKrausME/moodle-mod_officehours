@@ -14,14 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/** @package mod_officehours
- * Legacy appointment URLs are intentionally disabled. Previous booking records
- * remain archived for upgrade/backup/privacy purposes; no new slots are offered.
+/**
+ * Redirect inactive appointment booking links.
+ *
+ * @package    mod_officehours
+ * @copyright  2026 Eduardo Kraus {@link https://eduardokraus.com}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 use mod_officehours\local\access_manager;
 
 require_once('../../config.php');
 $id = required_param('id', PARAM_INT);
 [$cm, $course, $context] = access_manager::load($id);
+require_login($course, true, $cm);
 redirect(new moodle_url('/mod/officehours/view.php', ['id' => $id]),
     get_string('legacydisabled', 'officehours'));

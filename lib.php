@@ -14,10 +14,19 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/** @package mod_officehours */
+/**
+ * Implement Moodle callbacks for the guidance activity.
+ *
+ * @package    mod_officehours
+ * @copyright  2026 Eduardo Kraus {@link https://eduardokraus.com}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 use mod_officehours\local\calendar_service;
 use mod_officehours\local\completion_service;
 
+/**
+ * Report supported Moodle module features.
+ */
 function officehours_supports(string $feature): ?bool {
     switch ($feature) {
         case FEATURE_MOD_INTRO:
@@ -33,6 +42,9 @@ function officehours_supports(string $feature): ?bool {
     }
 }
 
+/**
+ * Create an Office Hours activity instance.
+ */
 function officehours_add_instance(stdClass $data, ?mod_officehours_mod_form $mform = null): int {
     global $DB;
     $data->timecreated = time();
@@ -40,6 +52,9 @@ function officehours_add_instance(stdClass $data, ?mod_officehours_mod_form $mfo
     return $DB->insert_record('officehours', $data);
 }
 
+/**
+ * Update an Office Hours activity instance.
+ */
 function officehours_update_instance(stdClass $data, ?mod_officehours_mod_form $mform = null): bool {
     global $DB;
     $data->id = $data->instance;
@@ -47,6 +62,9 @@ function officehours_update_instance(stdClass $data, ?mod_officehours_mod_form $
     return $DB->update_record('officehours', $data);
 }
 
+/**
+ * Delete the activity and related personal information.
+ */
 function officehours_delete_instance(int $id): bool {
     global $DB;
     if (!$DB->record_exists('officehours', ['id' => $id])) {
@@ -66,6 +84,9 @@ function officehours_delete_instance(int $id): bool {
     return true;
 }
 
+/**
+ * Build cached course module information.
+ */
 function officehours_get_coursemodule_info($coursemodule) {
     global $DB;
     $activity = $DB->get_record('officehours', ['id' => $coursemodule->instance]);
@@ -85,6 +106,9 @@ function officehours_get_coursemodule_info($coursemodule) {
     return $info;
 }
 
+/**
+ * Describe configured automatic completion rules.
+ */
 function officehours_get_completion_active_rule_descriptions($cm): array {
     global $DB;
     $activity = $DB->get_record('officehours', ['id' => $cm->instance]);
@@ -103,6 +127,9 @@ function officehours_get_completion_active_rule_descriptions($cm): array {
     return $descriptions;
 }
 
+/**
+ * Evaluate activity completion for a participant.
+ */
 function officehours_get_completion_state($course, $cm, $userid, $type): bool {
     return completion_service::complete((int)$cm->instance, (int)$userid, (bool)$type);
 }
