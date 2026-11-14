@@ -37,6 +37,12 @@ class restore_officehours_activity_structure_step extends restore_activity_struc
             new restore_path_element("officehours_exception", "/activity/officehours/exceptions/exception"),
             new restore_path_element("officehours_slot", "/activity/officehours/slots/slot")];
         if ($this->get_setting_value("userinfo")) {
+            $paths[] = new restore_path_element('officehours_request',
+                '/activity/officehours/requests/request');
+            $paths[] = new restore_path_element('officehours_message',
+                '/activity/officehours/requests/request/messages/message');
+            $paths[] = new restore_path_element('officehours_history',
+                '/activity/officehours/requests/request/histories/history');
             $paths[] = new restore_path_element("officehours_booking", "/activity/officehours/slots/slot/bookings/booking");
             $paths[] = new restore_path_element("officehours_waitlist", "/activity/officehours/slots/slot/waits/wait");
         }
@@ -129,17 +135,54 @@ class restore_officehours_activity_structure_step extends restore_activity_struc
         }
     }
 
+    /** Restore the private learning-support request. */
+    protected function process_officehours_request($data): void {
+        global $DB;
+        $data = (object)$data;
+        $oldid = $data->id;
+        unset($data->id);
+        $data->officehoursid = $this->get_new_parentid('officehours');
+        $data->userid = $this->get_mappingid('user', $data->userid, 0);
+        $data->teacherid = $this->get_mappingid('user', $data->teacherid, 0);
+        if (!$data->userid) {
+            $this->set_mapping('officehours_request', $oldid, 0);
+            return;
+        }
+        $newid = $DB->insert_record('officehours_request', $data);
+        $this->set_mapping('officehours_request', $oldid, $newid);
+    }
+
+    /** Restore private messages only when the user was mapped. */
+    protected function process_officehours_message($data): void {
+        global $DB;
+        $data = (object)$data;
+        unset($data->id);
+        $data->officehoursid = $this->get_new_parentid('officehours');
+        $data->requestid = $this->get_new_parentid('officehours_request');
+        $data->userid = $this->get_mappingid('user', $data->userid, 0);
+        if ($data->userid && $data->requestid) {
+            $DB->insert_record('officehours_message', $data);
+        }
+    }
+
+    /** Restore audited state changes with remapped authors. */
+    protected function process_officehours_history($data): void {
+        global $DB;
+        $data = (object)$data;
+        unset($data->id);
+        $data->officehoursid = $this->get_new_parentid('officehours');
+        $data->requestid = $this->get_new_parentid('officehours_request');
+        $data->userid = $this->get_mappingid('user', $data->userid, 0);
+        if ($data->userid && $data->requestid) {
+            $DB->insert_record('officehours_history', $data);
+        }
+    }
+
     /**
      * After execute for the Office Hours activity.
      */
     protected function after_execute(): void {
-        global $DB;
-        $this->add_related_files("mod_officehours", "intro", null);
-        $bookings = $DB->get_records("officehours_booking", ["officehoursid" => $this->get_new_parentid("officehours")]);
-        foreach ($bookings as $booking) {
-            if ($booking->state === "confirmed") {
-                calendar_service::sync((int)$booking->id);
-            }
-        }
+        // Past appointment records remain archived, but no calendar slots are recreated.
+        $this->add_related_files('mod_officehours', 'intro', null);
     }
 }

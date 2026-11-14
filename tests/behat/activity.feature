@@ -1,6 +1,6 @@
 @mod @mod_officehours
 Feature: Teachers can create an Office Hours activity
-  In order to organize academic appointments
+  In order to provide private academic guidance
   As a teacher
   I need to add the activity to my course
 
@@ -21,3 +21,5 @@ Feature: Teachers can create an Office Hours activity
     When I add an officehours activity to course "Test course" section "1" and I fill the form with:
       | Name | Academic consultations |
     Then I should see "Academic consultations"
+    And I follow "Academic consultations"
+    And I should see "Manage academic support"

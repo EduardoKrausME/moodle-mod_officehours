@@ -49,6 +49,10 @@ final class provider implements
      */
     public static function get_metadata(collection $collection): collection {
         $tables = [
+            'officehours_request' => ['userid' => 'privacy:userid', 'teacherid' => 'privacy:teacher',
+                'subject' => 'privacy:request', 'description' => 'privacy:request'],
+            'officehours_message' => ['userid' => 'privacy:userid', 'body' => 'privacy:request'],
+            'officehours_history' => ['userid' => 'privacy:userid'],
             "officehours_booking" => ["userid" => "privacy:userid", "subject" => "privacy:booking",
                 "notes" => "privacy:booking", "internalnotes" => "privacy:booking", "outcome" => "privacy:booking"],
             "officehours_availability" => ["teacherid" => "privacy:teacher"],
@@ -70,7 +74,9 @@ final class provider implements
     private static function contexts(int $userid): array {
         global $DB;
         $ids = [];
-        $sources = ["officehours_booking" => "userid", "officehours_waitlist" => "userid",
+        $sources = ["officehours_request" => "userid", "officehours_message" => "userid",
+            "officehours_history" => "userid",
+            "officehours_booking" => "userid", "officehours_waitlist" => "userid",
             "officehours_availability" => "teacherid", "officehours_slot" => "teacherid",
             "officehours_exception" => "teacherid", "officehours_notification" => "userid",
             "officehours_calendar" => "userid"];
@@ -78,6 +84,8 @@ final class provider implements
             $activities = $DB->get_fieldset_select($table, "officehoursid", $column . " = :uid", ["uid" => $userid]);
             $ids = array_merge($ids, $activities);
         }
+        $ids = array_merge($ids, $DB->get_fieldset_select('officehours_request',
+            'officehoursid', 'teacherid = :uid', ['uid' => $userid]));
         return array_unique(array_map("intval", $ids));
     }
 
@@ -109,13 +117,17 @@ final class provider implements
             return;
         }
         $users = [];
-        foreach (["officehours_booking" => "userid", "officehours_waitlist" => "userid",
+        foreach (["officehours_request" => "userid", "officehours_message" => "userid",
+            "officehours_history" => "userid",
+            "officehours_booking" => "userid", "officehours_waitlist" => "userid",
                 "officehours_availability" => "teacherid", "officehours_slot" => "teacherid",
                 "officehours_exception" => "teacherid", "officehours_notification" => "userid",
                 "officehours_calendar" => "userid"] as $table => $field) {
             $users = array_merge($users, $DB->get_fieldset_select($table, $field,
                 "officehoursid = :officeid", ["officeid" => $cm->instance]));
         }
+        $users = array_merge($users, $DB->get_fieldset_select('officehours_request',
+            'teacherid', 'officehoursid = :officeid', ['officeid' => $cm->instance]));
         $userlist->add_users(array_filter(array_unique(array_map("intval", $users))));
     }
 
@@ -133,7 +145,9 @@ final class provider implements
             if (!$cm) {
                 continue;
             }
-            foreach (["officehours_booking" => "userid", "officehours_waitlist" => "userid",
+            foreach (["officehours_request" => "userid", "officehours_message" => "userid",
+            "officehours_history" => "userid",
+            "officehours_booking" => "userid", "officehours_waitlist" => "userid",
                     "officehours_availability" => "teacherid", "officehours_slot" => "teacherid",
                     "officehours_exception" => "teacherid", "officehours_notification" => "userid",
                     "officehours_calendar" => "userid"] as $table => $column) {
@@ -157,6 +171,22 @@ final class provider implements
         }
         [$insql, $params] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED, "privacy");
         $params["officeid"] = $instanceid;
+        // Remove all conversation records when their owner requests erasure.
+        $requests = $DB->get_records_select('officehours_request',
+            'officehoursid = :officeid AND userid ' . $insql, $params);
+        foreach ($requests as $request) {
+            $DB->delete_records('officehours_message', ['requestid' => $request->id]);
+            $DB->delete_records('officehours_history', ['requestid' => $request->id]);
+            $DB->delete_records('officehours_request', ['id' => $request->id]);
+            $DB->delete_records_select('officehours_notification',
+                $DB->sql_like('eventkey', ':eventprefix'), ['eventprefix' => 'request:' . $request->id . ':%']);
+        }
+        foreach (['officehours_message', 'officehours_history'] as $table) {
+            $DB->delete_records_select($table,
+                'officehoursid = :officeid AND userid ' . $insql, $params);
+        }
+        $DB->execute('UPDATE {officehours_request} SET teacherid = 0
+            WHERE officehoursid = :officeid AND teacherid ' . $insql, $params);
         $bookings = $DB->get_records_select("officehours_booking",
             "officehoursid = :officeid AND userid " . $insql, $params);
         foreach ($bookings as $booking) {
@@ -197,7 +227,7 @@ final class provider implements
         foreach ($rows as $record) {
             calendar_service::remove((int)$record->id);
         }
-        foreach (["calendar", "notification", "waitlist", "booking", "exception", "slot", "availability"] as $table) {
+        foreach (["message", "history", "request", "calendar", "notification", "waitlist", "booking", "exception", "slot", "availability"] as $table) {
             $DB->delete_records("officehours_" . $table, ["officehoursid" => $cm->instance]);
         }
     }

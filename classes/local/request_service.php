@@ -111,7 +111,7 @@ final class request_service {
         }
         $now = time();
         $transaction = $DB->start_delegated_transaction();
-        $DB->insert_record('officehours_message', (object)[
+        $messageid = $DB->insert_record('officehours_message', (object)[
             'officehoursid' => $officehoursid, 'requestid' => $requestid,
             'userid' => (int)$USER->id, 'body' => $body, 'internal' => (int)$internal,
             'timecreated' => $now,
@@ -126,7 +126,7 @@ final class request_service {
         $DB->update_record('officehours_request', $update);
         $transaction->allow_commit();
         if (!$internal) {
-            notification_service::queue_request($requestid, 'reply');
+            notification_service::queue_request($requestid, 'reply:' . $messageid);
         }
     }
 
@@ -135,6 +135,11 @@ final class request_service {
      */
     public static function transition(int $officehoursid, int $requestid, string $next): void {
         global $DB, $USER;
+        $lock = \core\lock\lock_config::get_lock_factory('mod_officehours')->get_lock('request_' . $requestid, 15);
+        if (!$lock) {
+            throw new moodle_exception('lockfailed', 'officehours');
+        }
+        try {
         $request = self::get($officehoursid, $requestid);
         $cm = get_coursemodule_from_instance('officehours', $officehoursid, 0, false, MUST_EXIST);
         $staff = has_capability('mod/officehours:managerequests', context_module::instance($cm->id));
@@ -170,14 +175,17 @@ final class request_service {
         $DB->set_field('officehours_request', 'timemodified', $now, ['id' => $requestid]);
         $DB->set_field('officehours_request', 'timeclosed', $next === self::CLOSED ? $now : 0,
             ['id' => $requestid]);
-        $DB->insert_record('officehours_history', (object)[
+        $historyid = $DB->insert_record('officehours_history', (object)[
             'officehoursid' => $officehoursid, 'requestid' => $requestid,
             'userid' => (int)$USER->id, 'oldstate' => $request->state,
             'newstate' => $next, 'timecreated' => $now,
         ]);
         $transaction->allow_commit();
         completion_service::update($officehoursid, (int)$request->userid);
-        notification_service::queue_request($requestid, 'state');
+        notification_service::queue_request($requestid, 'state:' . $historyid);
+        } finally {
+            $lock->release();
+        }
     }
 
     /**

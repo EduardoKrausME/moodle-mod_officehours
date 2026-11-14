@@ -36,7 +36,7 @@ class backup_officehours_activity_structure_step extends backup_activity_structu
             "cancelnotice", "maxbookings", "allowreschedule", "waitlistenabled", "approvalrequired",
             "showbusy", "allowsubject", "additionalinfo", "location", "meetingurl", "timeopen",
             "timeclose", "offerexpires", "reminderminutes", "completionbooked", "completionattended",
-            "completioncount", "timecreated", "timemodified"]);
+            "completioncount", "responsehours", "completionrequested", "completionresolved", "completiontarget", "timecreated", "timemodified"]);
         $availabilities = new backup_nested_element("availabilities");
         $availability = new backup_nested_element("availability", ["id"], ["teacherid", "kind", "weekday",
             "startdate", "enddate", "startminute", "endminute", "timezone", "capacity", "enabled",
@@ -51,6 +51,22 @@ class backup_officehours_activity_structure_step extends backup_activity_structu
             "internalnotes", "outcome", "created", "modified", "remindersent"]);
         $waits = new backup_nested_element("waits");
         $wait = new backup_nested_element("wait", ["id"], ["userid", "status", "created", "offereduntil", "modified"]);
+        $requests = new backup_nested_element('requests');
+        $request = new backup_nested_element('request', ['id'],
+            ['userid', 'teacherid', 'subject', 'description', 'state',
+                'timecreated', 'timemodified', 'timeclosed']);
+        $messages = new backup_nested_element('messages');
+        $message = new backup_nested_element('message', ['id'],
+            ['userid', 'body', 'internal', 'timecreated']);
+        $histories = new backup_nested_element('histories');
+        $history = new backup_nested_element('history', ['id'],
+            ['userid', 'oldstate', 'newstate', 'timecreated']);
+        $activity->add_child($requests);
+        $requests->add_child($request);
+        $request->add_child($messages);
+        $messages->add_child($message);
+        $request->add_child($histories);
+        $histories->add_child($history);
         $activity->add_child($availabilities);
         $availabilities->add_child($availability);
         $activity->add_child($exceptions);
@@ -66,6 +82,16 @@ class backup_officehours_activity_structure_step extends backup_activity_structu
         $exception->set_source_table("officehours_exception", ["officehoursid" => backup::VAR_PARENTID]);
         $slot->set_source_table("officehours_slot", ["officehoursid" => backup::VAR_PARENTID]);
         if ($userinfo) {
+            $request->set_source_table('officehours_request',
+                ['officehoursid' => backup::VAR_PARENTID]);
+            $message->set_source_table('officehours_message',
+                ['requestid' => backup::VAR_PARENTID]);
+            $history->set_source_table('officehours_history',
+                ['requestid' => backup::VAR_PARENTID]);
+            $request->annotate_ids('user', 'userid');
+            $request->annotate_ids('user', 'teacherid');
+            $message->annotate_ids('user', 'userid');
+            $history->annotate_ids('user', 'userid');
             $booking->set_source_table("officehours_booking", ["slotid" => backup::VAR_PARENTID]);
             $wait->set_source_table("officehours_waitlist", ["slotid" => backup::VAR_PARENTID]);
             $booking->annotate_ids("user", "userid");
