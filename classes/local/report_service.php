@@ -57,6 +57,25 @@ final class report_service {
     }
 
     /**
+     * Return translated CSV column headings in export order.
+     *
+     * @return string[]
+     */
+    public static function csv_headers(): array {
+        return [
+            get_string("csvbookingid", "mod_officehours"),
+            get_string("csvstudentid", "mod_officehours"),
+            get_string("csvfirstname", "mod_officehours"),
+            get_string("csvlastname", "mod_officehours"),
+            get_string("csvstartutc", "mod_officehours"),
+            get_string("csvendutc", "mod_officehours"),
+            get_string("csvstatus", "mod_officehours"),
+            get_string("csvsubject", "mod_officehours"),
+            get_string("csvoutcome", "mod_officehours"),
+        ];
+    }
+
+    /**
      * export in Office Hours.
      */
     public static function export(stdClass $cm, int $from, int $to, int $studentid = 0): void {
@@ -66,8 +85,7 @@ final class report_service {
         header("Content-Type: text/csv; charset=UTF-8");
         header("Content-Disposition: attachment; filename=\"" . $filename . "\"");
         $output = fopen("php://output", "w");
-        fputcsv($output, ["Booking ID", "Student ID", "First name", "Last name", "Start UTC",
-            "End UTC", "Status", "Subject", "Outcome"]);
+        fputcsv($output, self::csv_headers());
         foreach ($rows as $booking) {
             $cells = [(int)$booking->id, (int)$booking->userid, $booking->firstname,
                 $booking->lastname, gmdate("c", $booking->starttime), gmdate("c", $booking->endtime),
