@@ -200,3 +200,6 @@ $string['officehours:managerequests'] = 'Responder e gerenciar solicitações de
 $string['privacy:request'] = 'Solicitação e respostas privadas de orientação';
 
 $string['completiontargetlabel'] = 'Quantidade necessária de solicitações resolvidas';
+
+$string['legacyarchive'] = 'Atendimentos anteriores (histórico somente leitura)';
+$string['legacyarchiveinfo'] = 'Estes registros pertencem ao sistema antigo de reservas. São mantidos apenas como histórico e não podem ser reservados ou alterados.';

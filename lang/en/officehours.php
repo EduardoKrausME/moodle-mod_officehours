@@ -200,3 +200,6 @@ $string['officehours:managerequests'] = 'Respond to and manage academic support 
 $string['privacy:request'] = 'Private learning support request and responses';
 
 $string['completiontargetlabel'] = 'Required resolved requests';
+
+$string['legacyarchive'] = 'Previous appointments (read-only history)';
+$string['legacyarchiveinfo'] = 'These entries belong to the previous Office Hours booking system. They are kept only as historical records and cannot be booked or changed.';

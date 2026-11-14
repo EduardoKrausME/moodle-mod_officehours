@@ -41,6 +41,11 @@ if (has_capability('mod/officehours:managerequests', $context)) {
     echo html_writer::link(new moodle_url('/mod/officehours/manage.php', ['id' => $id]),
         get_string('manageconsultations', 'officehours'), ['class' => 'btn btn-outline-primary ms-2 mb-3']);
 }
+if ($DB->record_exists('officehours_booking', ['officehoursid' => $activity->id])) {
+    echo html_writer::tag('p', html_writer::link(
+        new moodle_url('/mod/officehours/legacy.php', ['id' => $id]),
+        get_string('legacyarchive', 'officehours')), ['class' => 'mt-2']);
+}
 $mine = $DB->get_records('officehours_request',
     ['officehoursid' => $activity->id, 'userid' => $USER->id], 'timemodified DESC', '*', 0, 100);
 echo $OUTPUT->heading(get_string('myrequests', 'officehours'), 3);

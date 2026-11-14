@@ -119,6 +119,11 @@ final class request_service {
         $update = (object)['id' => $requestid, 'timemodified' => $now];
         if ($staff && $request->state === self::OPEN) {
             $update->state = self::INPROGRESS;
+            $DB->insert_record('officehours_history', (object)[
+                'officehoursid' => $officehoursid, 'requestid' => $requestid,
+                'userid' => (int)$USER->id, 'oldstate' => self::OPEN,
+                'newstate' => self::INPROGRESS, 'timecreated' => $now,
+            ]);
         }
         if ($staff && !$request->teacherid) {
             $update->teacherid = (int)$USER->id;
