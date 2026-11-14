@@ -42,6 +42,24 @@ foreach (['' => get_string('all'), 'open' => get_string('requeststateopen', 'off
         s($label), ['class' => 'btn btn-outline-secondary me-2 mb-2']);
 }
 echo html_writer::end_div();
+$counts = ['open' => 0, 'inprogress' => 0, 'resolved' => 0, 'closed' => 0];
+$allrequests = $DB->get_records('officehours_request',
+    ['officehoursid' => $activity->id], '', 'id,userid,state');
+foreach ($allrequests as $candidate) {
+    if (access_manager::visible_student($cm, (int)$candidate->userid, (int)$USER->id)) {
+        $counts[$candidate->state] = ($counts[$candidate->state] ?? 0) + 1;
+    }
+}
+echo html_writer::start_div('row mb-4');
+foreach ($counts as $state => $count) {
+    echo html_writer::start_div('col-sm-6 col-md-3 mb-2');
+    echo html_writer::start_div('card p-3');
+    echo html_writer::tag('strong', (string)$count, ['class' => 'h3']);
+    echo html_writer::tag('span', get_string('requeststate' . $state, 'officehours'));
+    echo html_writer::end_div();
+    echo html_writer::end_div();
+}
+echo html_writer::end_div();
 $visible = 0;
 foreach ($requests as $request) {
     if (!access_manager::visible_student($cm, (int)$request->userid, (int)$USER->id)) {

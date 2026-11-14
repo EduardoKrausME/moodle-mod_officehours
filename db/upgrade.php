@@ -87,9 +87,9 @@ function xmldb_officehours_upgrade(int $oldversion): bool {
             $dbman->create_table($table);
         }
         // Old booking, slot and waiting-list tables are intentionally untouched.
-        // Preserve historic completion configuration using the new semantic equivalent.
-        $DB->execute('UPDATE {officehours} SET completionrequested = completionbooked,
-            completionresolved = completionattended, completiontarget = completioncount');
+        // Preserve the old completion configuration in its legacy fields, but do not
+        // make past appointment activity count as future pedagogical support.
+        // Teachers may enable the new completion rules explicitly.
         upgrade_mod_savepoint(true, 2026111400, 'officehours');
     }
     return true;

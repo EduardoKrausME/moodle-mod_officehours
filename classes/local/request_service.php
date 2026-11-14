@@ -165,7 +165,7 @@ final class request_service {
         }
         $now = time();
         $transaction = $DB->start_delegated_transaction();
-        // Lock the request row through an atomic compare-and-swap to avoid stale transitions.
+        // The named Moodle lock serializes state changes for this request.
         $count = $DB->count_records('officehours_request',
             ['id' => $requestid, 'officehoursid' => $officehoursid, 'state' => $request->state]);
         if (!$count) {

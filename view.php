@@ -29,6 +29,10 @@ $completion->set_module_viewed($cm);
 echo $OUTPUT->header();
 echo $OUTPUT->heading(format_string($activity->name));
 echo format_module_intro('officehours', $activity, $cm->id);
+if ($activity->responsehours > 0) {
+    echo html_writer::tag('p', get_string('responsehours', 'officehours') . ': ' .
+        (int)$activity->responsehours, ['class' => 'text-muted']);
+}
 if (has_capability('mod/officehours:submitrequest', $context)) {
     echo html_writer::link(new moodle_url('/mod/officehours/newrequest.php', ['id' => $id]),
         get_string('newrequest', 'officehours'), ['class' => 'btn btn-primary mb-3']);

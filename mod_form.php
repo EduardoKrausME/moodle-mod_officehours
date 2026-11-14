@@ -43,7 +43,7 @@ class mod_officehours_mod_form extends moodleform_mod {
         foreach (['completionrequested', 'completionresolved'] as $name) {
             $form->addElement('advcheckbox', $name, get_string($name, 'officehours'));
         }
-        $form->addElement('text', 'completiontarget', get_string('completiontarget', 'officehours'),
+        $form->addElement('text', 'completiontarget', get_string('completiontargetlabel', 'officehours'),
             ['size' => 5]);
         $form->setType('completiontarget', PARAM_INT);
         $form->setDefault('completiontarget', 0);

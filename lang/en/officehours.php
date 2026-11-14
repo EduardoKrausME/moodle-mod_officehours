@@ -198,3 +198,5 @@ $string['messageprovider:request'] = 'Academic support request updates';
 $string['officehours:submitrequest'] = 'Submit private academic support requests';
 $string['officehours:managerequests'] = 'Respond to and manage academic support requests';
 $string['privacy:request'] = 'Private learning support request and responses';
+
+$string['completiontargetlabel'] = 'Required resolved requests';

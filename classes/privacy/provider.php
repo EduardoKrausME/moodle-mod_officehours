@@ -145,6 +145,18 @@ final class provider implements
             if (!$cm) {
                 continue;
             }
+            // A request owner may download the visible conversation, not just their own replies.
+            $owned = $DB->get_records('officehours_request',
+                ['officehoursid' => $cm->instance, 'userid' => $userid]);
+            foreach ($owned as $request) {
+                $messages = $DB->get_records('officehours_message',
+                    ['officehoursid' => $cm->instance, 'requestid' => $request->id, 'internal' => 0]);
+                $history = $DB->get_records('officehours_history',
+                    ['officehoursid' => $cm->instance, 'requestid' => $request->id]);
+                writer::with_context($context)->export_data(['consultation_' . $request->id],
+                    (object)['request' => $request, 'messages' => array_values($messages),
+                        'history' => array_values($history)]);
+            }
             foreach (["officehours_request" => "userid", "officehours_message" => "userid",
             "officehours_history" => "userid",
             "officehours_booking" => "userid", "officehours_waitlist" => "userid",

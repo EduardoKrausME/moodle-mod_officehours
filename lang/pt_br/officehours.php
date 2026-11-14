@@ -198,3 +198,5 @@ $string['messageprovider:request'] = 'Atualizações de orientação pedagógica
 $string['officehours:submitrequest'] = 'Enviar solicitações privadas de orientação';
 $string['officehours:managerequests'] = 'Responder e gerenciar solicitações de orientação';
 $string['privacy:request'] = 'Solicitação e respostas privadas de orientação';
+
+$string['completiontargetlabel'] = 'Quantidade necessária de solicitações resolvidas';
