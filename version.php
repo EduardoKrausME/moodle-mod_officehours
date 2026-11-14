@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->version = 2026111400;
-$plugin->release = "1.1.0-beta";
+$plugin->release = "1.1.0";
 $plugin->requires = 2024100700;
 $plugin->component = "mod_officehours";
 $plugin->maturity = MATURITY_STABLE;
