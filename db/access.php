@@ -15,32 +15,37 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Define Office Hours permissions.
+ * Capabilities for office hours.
  *
  * @package    mod_officehours
  * @copyright  2026 Eduardo Kraus {@link https://eduardokraus.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 defined('MOODLE_INTERNAL') || die();
 
 $capabilities = [
-    'mod/officehours:addinstance' => ['captype' => 'write', 'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => ['editingteacher' => CAP_ALLOW, 'manager' => CAP_ALLOW]],
-    'mod/officehours:view' => ['captype' => 'read', 'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => ['student' => CAP_ALLOW, 'teacher' => CAP_ALLOW,
-            'editingteacher' => CAP_ALLOW, 'manager' => CAP_ALLOW]],
-    'mod/officehours:submitrequest' => ['captype' => 'write', 'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => ['student' => CAP_ALLOW]],
-    'mod/officehours:managerequests' => ['captype' => 'write', 'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => ['teacher' => CAP_ALLOW, 'editingteacher' => CAP_ALLOW, 'manager' => CAP_ALLOW]],
-    // Legacy appointment capabilities intentionally have no default role grants.
-    'mod/officehours:book' => ['captype' => 'write', 'contextlevel' => CONTEXT_MODULE],
-    'mod/officehours:manageown' => ['captype' => 'write', 'contextlevel' => CONTEXT_MODULE],
-    'mod/officehours:createavailability' => ['captype' => 'write', 'contextlevel' => CONTEXT_MODULE],
-    'mod/officehours:manageavailability' => ['captype' => 'write', 'contextlevel' => CONTEXT_MODULE],
-    'mod/officehours:approve' => ['captype' => 'write', 'contextlevel' => CONTEXT_MODULE],
-    'mod/officehours:viewbookings' => ['captype' => 'read', 'contextlevel' => CONTEXT_MODULE],
-    'mod/officehours:attendance' => ['captype' => 'write', 'contextlevel' => CONTEXT_MODULE],
-    'mod/officehours:reports' => ['captype' => 'read', 'contextlevel' => CONTEXT_MODULE],
-    'mod/officehours:manage' => ['captype' => 'write', 'contextlevel' => CONTEXT_MODULE],
+    "mod/officehours:addinstance" => ["captype" => "write", "contextlevel" => CONTEXT_COURSE,
+        "archetypes" => ["editingteacher" => CAP_ALLOW, "manager" => CAP_ALLOW]],
+    "mod/officehours:view" => ["captype" => "read", "contextlevel" => CONTEXT_MODULE,
+        "archetypes" => ["student" => CAP_ALLOW, "teacher" => CAP_ALLOW,
+            "editingteacher" => CAP_ALLOW, "manager" => CAP_ALLOW]],
+    "mod/officehours:book" => ["captype" => "write", "contextlevel" => CONTEXT_MODULE,
+        "archetypes" => ["student" => CAP_ALLOW]],
+    "mod/officehours:manageown" => ["captype" => "write", "contextlevel" => CONTEXT_MODULE,
+        "archetypes" => ["student" => CAP_ALLOW]],
+    "mod/officehours:createavailability" => ["captype" => "write", "contextlevel" => CONTEXT_MODULE,
+        "archetypes" => ["teacher" => CAP_ALLOW, "editingteacher" => CAP_ALLOW, "manager" => CAP_ALLOW]],
+    "mod/officehours:manageavailability" => ["captype" => "write", "contextlevel" => CONTEXT_MODULE,
+        "archetypes" => ["editingteacher" => CAP_ALLOW, "manager" => CAP_ALLOW]],
+    "mod/officehours:approve" => ["captype" => "write", "contextlevel" => CONTEXT_MODULE,
+        "archetypes" => ["teacher" => CAP_ALLOW, "editingteacher" => CAP_ALLOW, "manager" => CAP_ALLOW]],
+    "mod/officehours:viewbookings" => ["captype" => "read", "contextlevel" => CONTEXT_MODULE,
+        "archetypes" => ["teacher" => CAP_ALLOW, "editingteacher" => CAP_ALLOW, "manager" => CAP_ALLOW]],
+    "mod/officehours:attendance" => ["captype" => "write", "contextlevel" => CONTEXT_MODULE,
+        "archetypes" => ["teacher" => CAP_ALLOW, "editingteacher" => CAP_ALLOW, "manager" => CAP_ALLOW]],
+    "mod/officehours:reports" => ["captype" => "read", "contextlevel" => CONTEXT_MODULE,
+        "archetypes" => ["editingteacher" => CAP_ALLOW, "manager" => CAP_ALLOW]],
+    "mod/officehours:manage" => ["captype" => "write", "contextlevel" => CONTEXT_MODULE,
+        "archetypes" => ["editingteacher" => CAP_ALLOW, "manager" => CAP_ALLOW]],
 ];

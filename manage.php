@@ -15,76 +15,104 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Display teachers' consultation management dashboard.
+ * Teacher dashboard and reservation decisions.
  *
  * @package    mod_officehours
  * @copyright  2026 Eduardo Kraus {@link https://eduardokraus.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-use mod_officehours\local\access_manager;
 
-require_once('../../config.php');
-$id = required_param('id', PARAM_INT);
+use mod_officehours\local\access_manager;
+use mod_officehours\local\booking_service;
+use mod_officehours\local\report_service;
+
+require_once("../../config.php");
+
+$id = required_param("id", PARAM_INT);
+$period = optional_param("period", "week", PARAM_ALPHA);
+$from = optional_param("from", time(), PARAM_INT);
+$studentid = optional_param("studentid", 0, PARAM_INT);
+$groupid = optional_param("groupid", 0, PARAM_INT);
+$search = optional_param("search", "", PARAM_TEXT);
+$action = optional_param("action", "", PARAM_ALPHA);
+$bookingid = optional_param("bookingid", 0, PARAM_INT);
 [$cm, $course, $context, $activity] = access_manager::load($id);
 require_login($course, true, $cm);
-access_manager::capability($cm, 'managerequests');
-$PAGE->set_url(new moodle_url('/mod/officehours/manage.php', ['id' => $id]));
+access_manager::capability($cm, "viewbookings");
+$PAGE->set_url(new moodle_url("/mod/officehours/manage.php", ["id" => $id]));
 $PAGE->set_context($context);
-$PAGE->set_title(get_string('manageconsultations', 'officehours'));
-$PAGE->set_heading(format_string($course->fullname));
-$filter = optional_param('state', '', PARAM_ALPHA);
-$conditions = ['officehoursid' => $activity->id];
-if (in_array($filter, ['open', 'inprogress', 'resolved', 'closed'], true)) {
-    $conditions['state'] = $filter;
+$PAGE->set_title(get_string("teacherpanel", "officehours"));
+if ($action === "update") {
+    require_sesskey();
+    $status = required_param("status", PARAM_ALPHAEXT);
+    $internalnotes = optional_param("internalnotes", "", PARAM_TEXT);
+    $outcome = optional_param("outcome", "", PARAM_TEXT);
+    booking_service::change_state($bookingid, $status, (int)$USER->id,
+        $internalnotes, $outcome);
+    redirect(new moodle_url("/mod/officehours/manage.php", ["id" => $id]),
+        get_string("changesaved", "officehours"));
 }
-$requests = $DB->get_records('officehours_request', $conditions, 'timemodified DESC', '*', 0, 500);
-echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('manageconsultations', 'officehours'));
-echo html_writer::start_div('mb-3');
-foreach (['' => get_string('all'), 'open' => get_string('requeststateopen', 'officehours'),
-        'inprogress' => get_string('requeststateinprogress', 'officehours'),
-        'resolved' => get_string('requeststateresolved', 'officehours'),
-        'closed' => get_string('requeststateclosed', 'officehours')] as $state => $label) {
-    echo html_writer::link(new moodle_url('/mod/officehours/manage.php', ['id' => $id, 'state' => $state]),
-        s($label), ['class' => 'btn btn-outline-secondary me-2 mb-2']);
+$day = (int)(floor($from / DAYSECS) * DAYSECS);
+$span = ["day" => DAYSECS, "week" => WEEKSECS, "month" => 31 * DAYSECS][$period] ?? WEEKSECS;
+if (optional_param("export", 0, PARAM_BOOL)) {
+    report_service::export($cm, $day, $day + $span, $studentid);
 }
-echo html_writer::end_div();
-$counts = ['open' => 0, 'inprogress' => 0, 'resolved' => 0, 'closed' => 0];
-$allrequests = $DB->get_records('officehours_request',
-    ['officehoursid' => $activity->id], '', 'id,userid,state');
-foreach ($allrequests as $candidate) {
-    if (access_manager::visible_student($cm, (int)$candidate->userid, (int)$USER->id)) {
-        $counts[$candidate->state] = ($counts[$candidate->state] ?? 0) + 1;
-    }
-}
-echo html_writer::start_div('row mb-4');
-foreach ($counts as $state => $count) {
-    echo html_writer::start_div('col-sm-6 col-md-3 mb-2');
-    echo html_writer::start_div('card p-3');
-    echo html_writer::tag('strong', (string)$count, ['class' => 'h3']);
-    echo html_writer::tag('span', get_string('requeststate' . $state, 'officehours'));
-    echo html_writer::end_div();
-    echo html_writer::end_div();
-}
-echo html_writer::end_div();
-$visible = 0;
-foreach ($requests as $request) {
-    if (!access_manager::visible_student($cm, (int)$request->userid, (int)$USER->id)) {
+$bookings = report_service::bookings($cm, $day, $day + $span, $studentid);
+$counts = array_fill_keys(["pending", "confirmed", "completed", "no-show", "cancelled", "rejected"], 0);
+$records = [];
+foreach ($bookings as $booking) {
+    if ($groupid && !groups_is_member($groupid, (int)$booking->userid)) {
         continue;
     }
-    $visible++;
-    $student = core_user::get_user((int)$request->userid);
-    echo html_writer::start_div('card p-3 mb-2');
-    echo html_writer::link(new moodle_url('/mod/officehours/request.php',
-        ['id' => $id, 'requestid' => $request->id]), format_string($request->subject));
-    echo html_writer::tag('p', s($student ? fullname($student) : get_string('unknownuser', 'officehours')) .
-        ' - ' . get_string('requeststate' . $request->state, 'officehours') .
-        ' - ' . userdate($request->timemodified), ['class' => 'mb-0 text-muted']);
-    echo html_writer::end_div();
+    if ($search !== "" && stripos(fullname($booking), $search) === false &&
+            stripos($booking->subject ?? "", $search) === false) {
+        continue;
+    }
+    $counts[$booking->state]++;
+    $options = [];
+    foreach (["confirmed", "rejected", "cancelled", "completed", "no-show"] as $status) {
+        $allowed = ["pending" => ["confirmed", "rejected", "cancelled"],
+            "confirmed" => ["cancelled", "completed", "no-show"]];
+        if (in_array($status, $allowed[$booking->state] ?? [], true)) {
+            $options[] = ["value" => $status, "name" => get_string("state" . str_replace("-", "", $status), "officehours")];
+        }
+    }
+    $records[] = ["id" => $booking->id, "student" => fullname($booking),
+        "date" => userdate($booking->starttime), "subject" => s($booking->subject),
+        "state" => get_string("state" . str_replace("-", "", $booking->state), "officehours"),
+        "options" => $options, "hasoptions" => !empty($options),
+        "notes" => s($booking->internalnotes ?? ""), "outcome" => s($booking->outcome ?? "")];
 }
-if (!$visible) {
-    echo $OUTPUT->notification(get_string('norequests', 'officehours'), 'info');
+$waitentries = $DB->get_records("officehours_waitlist", ["officehoursid" => $activity->id], "created ASC", "*", 0, 100);
+$wait = [];
+foreach ($waitentries as $entry) {
+    if (access_manager::visible_student($cm, (int)$entry->userid, (int)$USER->id)) {
+        $wait[] = ["student" => fullname($DB->get_record("user", ["id" => $entry->userid], "*", MUST_EXIST)),
+            "status" => $entry->status, "created" => userdate($entry->created)];
+    }
 }
-echo html_writer::link(new moodle_url('/mod/officehours/view.php', ['id' => $id]),
-    get_string('back'), ['class' => 'btn btn-link']);
+$data = ["title" => get_string("teacherpanel", "officehours"), "records" => $records,
+    "wait" => $wait, "counts" => [], "sesskey" => sesskey(), "cmid" => $id,
+    "searchlabel" => get_string("search", "officehours"), "filterlabel" => get_string("filter", "officehours"),
+    "query" => $search, "periods" => [],
+    "actionurl" => (new moodle_url("/mod/officehours/manage.php"))->out(false),
+    "exporturl" => (new moodle_url("/mod/officehours/manage.php", ["id" => $id,
+        "period" => $period, "from" => $day, "studentid" => $studentid, "export" => 1]))->out(false),
+    "export" => get_string("exportcsv", "officehours"),
+    "save" => get_string("savechanges"), "notes" => get_string("internalnotes", "officehours"),
+    "outcome" => get_string("outcome", "officehours"),
+    "waittitle" => get_string("waitinglist", "officehours"), "studentlabel" => get_string("student", "officehours"),
+    "statuslabel" => get_string("status", "officehours"), "datelabel" => get_string("date"),
+];
+foreach (["day", "week", "month"] as $size) {
+    $data["periods"][] = ["label" => get_string("period" . $size, "officehours"),
+        "url" => (new moodle_url("/mod/officehours/manage.php", ["id" => $id,
+            "period" => $size, "from" => $day, "groupid" => $groupid,
+            "studentid" => $studentid]))->out(false)];
+}
+foreach ($counts as $status => $count) {
+    $data["counts"][] = ["status" => get_string("state" . str_replace("-", "", $status), "officehours"), "count" => $count];
+}
+echo $OUTPUT->header();
+echo $OUTPUT->render_from_template("mod_officehours/manage", $data);
 echo $OUTPUT->footer();

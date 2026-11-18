@@ -15,37 +15,39 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Define the learner's private guidance request form.
+ * Booking confirmation form.
  *
  * @package    mod_officehours
  * @copyright  2026 Eduardo Kraus {@link https://eduardokraus.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 namespace mod_officehours\form;
 
 use moodleform;
 
 defined('MOODLE_INTERNAL') || die();
-require_once($CFG->libdir . '/formslib.php');
+require_once($CFG->libdir . "/formslib.php");
 
 /**
- * Private learning-support request.
+ * CSRF-protected booking confirmation.
  */
-final class request_form extends moodleform {
+final class booking_form extends moodleform {
     /**
-     * Define the fields and buttons for this Moodle form.
+     * definition in Office Hours.
      */
     public function definition(): void {
-        $form = $this->_form;
-        $form->addElement('hidden', 'id');
-        $form->setType('id', PARAM_INT);
-        $form->addElement('text', 'subject', get_string('requestsubject', 'officehours'), ['size' => 60]);
-        $form->setType('subject', PARAM_TEXT);
-        $form->addRule('subject', null, 'required', null, 'client');
-        $form->addElement('textarea', 'description', get_string('requestdescription', 'officehours'),
-            ['rows' => 7, 'cols' => 70]);
-        $form->setType('description', PARAM_TEXT);
-        $form->addRule('description', null, 'required', null, 'client');
-        $this->add_action_buttons(true, get_string('sendrequest', 'officehours'));
+        $mform = $this->_form;
+        foreach (["id", "slotid", "offerid"] as $name) {
+            $mform->addElement("hidden", $name);
+            $mform->setType($name, PARAM_INT);
+        }
+        if ($this->_customdata["allowsubject"]) {
+            $mform->addElement("text", "subject", get_string("subject", "officehours"));
+            $mform->setType("subject", PARAM_TEXT);
+        }
+        $mform->addElement("textarea", "notes", get_string("notes", "officehours"));
+        $mform->setType("notes", PARAM_TEXT);
+        $this->add_action_buttons(true, get_string("confirmbooking", "officehours"));
     }
 }

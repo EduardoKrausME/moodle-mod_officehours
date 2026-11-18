@@ -15,65 +15,66 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Expose academic guidance completion rules.
+ * Moodle custom completion rules.
  *
  * @package    mod_officehours
  * @copyright  2026 Eduardo Kraus {@link https://eduardokraus.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 namespace mod_officehours\completion;
 
 use coding_exception;
 use core_completion\activity_custom_completion;
 
 /**
- * Custom completion based on consultations submitted and resolved.
+ * Expose the booking and participation criteria to the modern completion API.
  */
 final class custom_completion extends activity_custom_completion {
     /**
-     * List all available custom completion rules.
+     * get defined custom rules in Office Hours.
      */
     public static function get_defined_custom_rules(): array {
-        return ['completionrequested', 'completionresolved', 'completiontarget'];
+        return ["completionbooked", "completionattended", "completioncount"];
     }
 
     /**
-     * Provide the descriptions of custom completion rules.
+     * get custom rule descriptions in Office Hours.
      */
     public function get_custom_rule_descriptions(): array {
         global $DB;
-        $activity = $DB->get_record('officehours', ['id' => $this->cm->instance], '*', MUST_EXIST);
+        $activity = $DB->get_record("officehours", ["id" => $this->cm->instance], "*", MUST_EXIST);
         return [
-            'completionrequested' => get_string('completionrequested', 'officehours'),
-            'completionresolved' => get_string('completionresolved', 'officehours'),
-            'completiontarget' => get_string('completiontarget', 'officehours', $activity->completiontarget),
+            "completionbooked" => get_string("completionbooked", "officehours"),
+            "completionattended" => get_string("completionattended", "officehours"),
+            "completioncount" => get_string("completioncount", "officehours", $activity->completioncount),
         ];
     }
 
     /**
-     * Evaluate the current state of one completion rule.
+     * get state in Office Hours.
      */
     public function get_state(string $rule): int {
         global $DB;
         if (!in_array($rule, self::get_defined_custom_rules(), true)) {
-            throw new coding_exception('Unknown completion condition');
+            throw new coding_exception("Unknown completion condition");
         }
-        $activity = $DB->get_record('officehours', ['id' => $this->cm->instance], '*', MUST_EXIST);
-        $created = $DB->count_records('officehours_request',
-            ['officehoursid' => $activity->id, 'userid' => $this->userid]);
-        $resolved = $DB->count_records_select('officehours_request',
-            "officehoursid = :oid AND userid = :uid AND state IN ('resolved', 'closed')",
-            ['oid' => $activity->id, 'uid' => $this->userid]);
+        $activity = $DB->get_record("officehours", ["id" => $this->cm->instance], "*", MUST_EXIST);
+        $confirmed = $DB->count_records_select("officehours_booking",
+            "officehoursid = :officeid AND userid = :userid AND state IN ('confirmed', 'completed')",
+            ["officeid" => $activity->id, "userid" => $this->userid]);
+        $completed = $DB->count_records("officehours_booking", ["officehoursid" => $activity->id,
+            "userid" => $this->userid, "state" => "completed"]);
         $passed = match ($rule) {
-            'completionrequested' => $created > 0,
-            'completionresolved' => $resolved > 0,
-            'completiontarget' => $resolved >= (int)$activity->completiontarget,
+            "completionbooked" => $confirmed > 0,
+            "completionattended" => $completed > 0,
+            "completioncount" => $completed >= $activity->completioncount,
         };
         return $passed ? COMPLETION_COMPLETE : COMPLETION_INCOMPLETE;
     }
 
     /**
-     * Return the display order of completion rules.
+     * get sort order in Office Hours.
      */
     public function get_sort_order(): array {
         return self::get_defined_custom_rules();

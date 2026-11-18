@@ -50,31 +50,48 @@ final class notification_service {
     }
 
     /**
-     * Queue an update to the requester and authorized consultation teachers.
+     * queue booking in Office Hours.
      */
-    public static function queue_request(int $requestid, string $event): void {
-        global $DB, $USER;
-        $request = $DB->get_record('officehours_request', ['id' => $requestid], '*', MUST_EXIST);
-        $cm = get_coursemodule_from_instance('officehours', $request->officehoursid, 0, false, MUST_EXIST);
-        $context = \context_module::instance($cm->id);
-        $recipients = [(int)$request->userid];
-        if ($request->teacherid) {
-            $recipients[] = (int)$request->teacherid;
-        } else {
-            $teachers = get_users_by_capability($context, 'mod/officehours:managerequests',
-                'u.id', '', '', '', '', '', false);
-            foreach ($teachers as $teacher) {
-                if (access_manager::visible_student($cm, (int)$request->userid, (int)$teacher->id)) {
-                    $recipients[] = (int)$teacher->id;
-                }
-            }
+    public static function queue_booking(int $bookingid, string $action): void {
+        global $DB;
+        $booking = $DB->get_record("officehours_booking", ["id" => $bookingid], "*", MUST_EXIST);
+        $slot = $DB->get_record("officehours_slot", ["id" => $booking->slotid], "*", MUST_EXIST);
+        foreach (array_unique([(int)$booking->userid, (int)$slot->teacherid]) as $userid) {
+            self::queue((int)$booking->officehoursid, $bookingid, 0, $userid,
+                "booking:" . $bookingid . ":" . $action . ":" . $booking->modified . ":" . $userid);
         }
-        foreach (array_unique($recipients) as $recipient) {
-            if ($recipient === (int)$USER->id) {
-                continue;
+    }
+
+    /**
+     * queue offer in Office Hours.
+     */
+    public static function queue_offer(int $offerid): void {
+        global $DB;
+        $entry = $DB->get_record("officehours_waitlist", ["id" => $offerid], "*", MUST_EXIST);
+        self::queue((int)$entry->officehoursid, 0, $offerid, (int)$entry->userid,
+            "offer:" . $offerid . ":" . $entry->offereduntil);
+    }
+
+    /**
+     * queue reminders in Office Hours.
+     */
+    public static function queue_reminders(): void {
+        global $DB;
+        $sql = "SELECT b.* FROM {officehours_booking} b JOIN {officehours_slot} s ON s.id = b.slotid
+                  JOIN {officehours} o ON o.id = b.officehoursid
+                  WHERE b.state = :confirmed AND b.remindersent = 0 AND o.reminderminutes > 0
+                    AND s.starttime > :now AND s.starttime <= :until";
+        $now = time();
+        $bookings = $DB->get_records_sql($sql, ["confirmed" => "confirmed", "now" => $now,
+            "until" => $now + 1440 * MINSECS]);
+        foreach ($bookings as $booking) {
+            $slot = $DB->get_record("officehours_slot", ["id" => $booking->slotid]);
+            $activity = $DB->get_record("officehours", ["id" => $booking->officehoursid]);
+            if ($slot && $activity && $slot->starttime - $now <= $activity->reminderminutes * 60) {
+                self::queue((int)$booking->officehoursid, (int)$booking->id, 0, (int)$booking->userid,
+                    "reminder:" . $booking->id . ":" . $slot->starttime);
+                $DB->set_field("officehours_booking", "remindersent", 1, ["id" => $booking->id]);
             }
-            self::queue((int)$request->officehoursid, 0, 0, $recipient,
-                'request:' . $requestid . ':' . $event . ':' . $request->timemodified . ':' . $recipient);
         }
     }
 
@@ -83,9 +100,7 @@ final class notification_service {
      */
     public static function flush(): void {
         global $DB;
-        $pending = $DB->get_records_select('officehours_notification',
-            "sent = 0 AND " . $DB->sql_like('eventkey', ':prefix'),
-            ['prefix' => 'request:%'], 'id ASC', '*', 0, 100);
+        $pending = $DB->get_records("officehours_notification", ["sent" => 0], "id ASC", "*", 0, 100);
         foreach ($pending as $record) {
             $lock = lock_config::get_lock_factory("mod_officehours")->get_lock("notification_" . $record->id, 2);
             if (!$lock) {
@@ -102,7 +117,8 @@ final class notification_service {
                 $cm = get_coursemodule_from_instance("officehours", $activity->id);
                 $payload = new message();
                 $payload->component = "mod_officehours";
-                $payload->name = 'request';
+                $payload->name = $record->waitlistid ? "offer" :
+                    (str_starts_with($record->eventkey, "reminder:") ? "reminder" : "booking");
                 $payload->userfrom = core_user::get_noreply_user();
                 $payload->userto = $person;
                 $payload->subject = get_string("notificationtitle", "officehours", $activity->name);

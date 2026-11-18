@@ -15,42 +15,32 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Test academic guidance activity completion.
+ * Custom completion integration test.
  *
  * @package    mod_officehours
  * @copyright  2026 Eduardo Kraus {@link https://eduardokraus.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 namespace mod_officehours;
 
 use advanced_testcase;
 use mod_officehours\local\completion_service;
-use mod_officehours\local\request_service;
 
 /**
- * Completion from private guidance cases, not bookings.
+ * Automatic completion based on reservation state.
  */
 final class completion_test extends advanced_testcase {
     /**
-     * Verify the related academic guidance behavior.
-     *
+     * Document the Office Hours behaviour.
      * @covers \mod_officehours\local\completion_service::complete
      */
-    public function test_completion_from_guidance_requests(): void {
+    public function test_completion_without_reservations_is_false(): void {
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course();
-        $activity = $this->getDataGenerator()->create_module('officehours', [
-            'course' => $course->id, 'completionrequested' => 1, 'completionresolved' => 1]);
+        $activity = $this->getDataGenerator()->create_module("officehours", ["course" => $course->id,
+            "completionbooked" => 1, "completionattended" => 1]);
         $student = $this->getDataGenerator()->create_user();
-        $teacher = $this->getDataGenerator()->create_user();
-        $this->getDataGenerator()->enrol_user($student->id, $course->id, 'student');
-        $this->getDataGenerator()->enrol_user($teacher->id, $course->id, 'editingteacher');
-        $this->setUser($student);
         $this->assertFalse(completion_service::complete((int)$activity->id, (int)$student->id));
-        $id = request_service::create((int)$activity->id, 'Exercise 3', 'Please explain the third step');
-        $this->assertFalse(completion_service::complete((int)$activity->id, (int)$student->id));
-        $this->setUser($teacher);
-        request_service::transition((int)$activity->id, $id, request_service::RESOLVED);
-        $this->assertTrue(completion_service::complete((int)$activity->id, (int)$student->id));
     }
 }

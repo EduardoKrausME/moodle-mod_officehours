@@ -15,17 +15,56 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Redirect inactive appointment booking links.
+ * Reservation and waiting-list actions.
  *
  * @package    mod_officehours
  * @copyright  2026 Eduardo Kraus {@link https://eduardokraus.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-use mod_officehours\local\access_manager;
 
-require_once('../../config.php');
-$id = required_param('id', PARAM_INT);
-[$cm, $course, $context] = access_manager::load($id);
+use mod_officehours\form\booking_form;
+use mod_officehours\local\access_manager;
+use mod_officehours\local\booking_service;
+use mod_officehours\local\waiting_list_service;
+
+require_once("../../config.php");
+
+$id = required_param("id", PARAM_INT);
+$slotid = optional_param("slotid", 0, PARAM_INT);
+$bookingid = optional_param("bookingid", 0, PARAM_INT);
+$offerid = optional_param("offerid", 0, PARAM_INT);
+$action = optional_param("action", "book", PARAM_ALPHA);
+[$cm, $course, $context, $activity] = access_manager::load($id);
 require_login($course, true, $cm);
-redirect(new moodle_url('/mod/officehours/view.php', ['id' => $id]),
-    get_string('legacydisabled', 'officehours'));
+$PAGE->set_url(new moodle_url("/mod/officehours/booking.php", ["id" => $id]));
+$PAGE->set_context($context);
+$PAGE->set_title(get_string("reserve", "officehours"));
+$back = new moodle_url("/mod/officehours/view.php", ["id" => $id]);
+if ($action === "wait") {
+    require_sesskey();
+    waiting_list_service::join($slotid, (int)$USER->id);
+    redirect($back, get_string("waitlisted", "officehours"));
+}
+if ($action === "cancel") {
+    require_sesskey();
+    booking_service::change_state($bookingid, "cancelled", (int)$USER->id);
+    redirect($back, get_string("cancelled", "officehours"));
+}
+if ($action === "reschedule") {
+    require_sesskey();
+    booking_service::reschedule($bookingid, $slotid, (int)$USER->id);
+    redirect($back, get_string("rescheduled", "officehours"));
+}
+$form = new booking_form(null, ["allowsubject" => (bool)$activity->allowsubject]);
+$form->set_data(["id" => $id, "slotid" => $slotid, "offerid" => $offerid]);
+if ($form->is_cancelled()) {
+    redirect($back);
+}
+if ($data = $form->get_data()) {
+    booking_service::book((int)$activity->id,
+        (int)$data->slotid, (int)$USER->id, $data->subject ?? "", $data->notes ?? "", (int)$data->offerid);
+    redirect($back, get_string("bookingsaved", "officehours"));
+}
+echo $OUTPUT->header();
+$form->display();
+echo $OUTPUT->footer();

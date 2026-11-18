@@ -106,5 +106,9 @@ function xmldb_officehours_upgrade(int $oldversion): bool {
         // Teachers may enable the new completion rules explicitly.
         upgrade_mod_savepoint(true, 2026111400, 'officehours');
     }
+    if ($oldversion < 2026111800) {
+        // Retain request records for backups and privacy handling while booking remains available.
+        upgrade_mod_savepoint(true, 2026111800, 'officehours');
+    }
     return true;
 }

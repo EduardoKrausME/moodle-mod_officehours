@@ -15,32 +15,36 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Deliver private academic guidance notifications.
+ * Scheduled waiting list, reminder, and notification work.
  *
  * @package    mod_officehours
  * @copyright  2026 Eduardo Kraus {@link https://eduardokraus.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 namespace mod_officehours\task;
 
 use core\task\scheduled_task;
 use mod_officehours\local\notification_service;
+use mod_officehours\local\waiting_list_service;
 
 /**
- * Deliver private guidance notifications. Legacy booking reminders are disabled.
+ * Reconcile time-based tasks without duplicated offers.
  */
 final class maintenance extends scheduled_task {
     /**
-     * Return the label for the scheduled task.
+     * get name in Office Hours.
      */
     public function get_name(): string {
-        return get_string('maintenancetask', 'officehours');
+        return get_string("maintenancetask", "officehours");
     }
 
     /**
-     * Flush the pending academic guidance notifications.
+     * execute in Office Hours.
      */
     public function execute(): void {
+        waiting_list_service::expire_and_promote();
+        notification_service::queue_reminders();
         notification_service::flush();
     }
 }
